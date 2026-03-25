@@ -1,4 +1,8 @@
 {
+  "buildCommand": null,
+  "installCommand": null,
+  "framework": null,
+  "outputDirectory": ".",
   "rewrites": [
     { "source": "/", "destination": "/Salama_Cash_Flow_Planner.html" }
   ]
