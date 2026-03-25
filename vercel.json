@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/Salama_Cash_Flow_Planner.html" }
+  ]
+}

@@ -1779,6 +1779,137 @@ function resetAll(){
   render();
 }
 
+// ===== HAIKU CASH ASSISTANT =====
+var haiku = {
+  open: false,
+  messages: [],
+  loading: false,
+  apiKey: sessionStorage.getItem('anthropic_key') || '',
+};
+
+function haikuBuildSystemPrompt(){
+  if(!cashData) return 'You are the cash flow assistant for Salama Brewing Company Oy, a Finnish craft brewery.';
+  var cd=cashData;
+  var wc=cd.working_capital;
+  var fwks=cd.forecast.weeks.slice(0,6).map(function(w){return w.label+': closing '+fmtE(w.closing_balance)+' ('+w.confidence+')';}).join('\n  ');
+  return 'You are the cash flow assistant for Salama Brewing Company Oy, a Finnish craft brewery.\n\nCURRENT SITUATION ('+cd.meta.base_date+', '+cd.meta.mode.toUpperCase()+' DATA):\n- Bank balance: '+fmtE(cd.bank.balance)+'\n- Open AR (money owed to us): '+fmtE(cd.receivables.total_open)+' across '+cd.receivables.invoice_count+' invoices\n- Open AP (we owe suppliers): '+fmtE(cd.payables.total_open)+' across '+cd.payables.invoice_count+' invoices\n- DSO (avg days customers pay): '+wc.dso_overall+' days\n- DPO (avg days we pay suppliers): '+wc.dpo_overall+' days\n- Cash Conversion Cycle: '+wc.ccc+' days\n\n6-WEEK FORECAST:\n  '+fwks+'\n\nFIXED MONTHLY OUTFLOWS (must hit these dates):\n- OP Bank Loan: €15,356 on last day of month\n- Salary run 1: €23,713 on 15th\n- Salary run 2: €23,712 on 28th\n- Rent Kerava: €12,350 on 5th\n- Rent Espoo: €2,406 on 5th\n- Total fixed: €81,137/month\n\nBUSINESS CONTEXT:\n- Finnish craft brewery, Kerava production + Bemböle contract brewing\n- Highly seasonal: August peak ~€282K revenue, December trough ~€154K\n- Gross margin ~58%\n- Key risk: €74K gap between LivePlan cash forecast and Procountor reality (working capital timing)\n- Junior debt €140K converting to equity (confirmed)\n- Key customers: Kesko (DSO 28d), SOK (DSO 39d), Bars/Pubs (DSO 41d), Export/Brill (DSO 51d)\n\nAnswer questions precisely with euro amounts. Be direct. If asked "can we make payroll Friday" check the forecast dates and give a yes/no with the balance. Use €-format for all amounts.';
+}
+
+function haikuRender(){
+  var el=document.getElementById('haikuPanel');
+  if(!el) return;
+  var msgs=haiku.messages;
+  var html='';
+
+  if(!haiku.apiKey){
+    html+='<div style="padding:12px">';
+    html+='<div style="font-size:12px;color:#6B7280;margin-bottom:8px">Enter your Anthropic API key to enable AI queries. Stored in session only (not saved).</div>';
+    html+='<input id="haikuKey" type="password" placeholder="sk-ant-..." style="width:100%;border:1px solid #D1D5DB;border-radius:6px;padding:8px;font-size:12px;margin-bottom:8px">';
+    html+='<button onclick="haikuSaveKey()" style="width:100%;background:#E91E8C;color:#fff;border:none;padding:8px;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px">Connect</button>';
+    html+='</div>';
+  } else {
+    if(msgs.length===0){
+      html+='<div style="padding:12px 12px 0">';
+      html+='<div style="font-size:11px;color:#9CA3AF;margin-bottom:8px">Ask anything about Salama\'s cash position</div>';
+      ['Can we make payroll on the 28th?','When do we next go below \u20ac20K?','What\'s our biggest cash risk this week?','What if Kesko pays 10 days late?'].forEach(function(q){
+        html+='<div onclick="haikuSend(\''+q+'\')" style="cursor:pointer;padding:6px 10px;background:#F3F4F6;border-radius:6px;margin-bottom:5px;font-size:12px;color:#374151;border:1px solid #E5E7EB">'+q+'</div>';
+      });
+      html+='</div>';
+    } else {
+      html+='<div style="flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px">';
+      msgs.forEach(function(m){
+        var isUser=m.role==='user';
+        html+='<div style="display:flex;justify-content:'+(isUser?'flex-end':'flex-start')+'">';
+        html+='<div style="max-width:85%;padding:8px 11px;border-radius:10px;font-size:12px;line-height:1.45;background:'+(isUser?'#E91E8C':'#F3F4F6')+';color:'+(isUser?'#fff':'#1F2937')+'">'+m.content.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')+'</div>';
+        html+='</div>';
+      });
+      if(haiku.loading){
+        html+='<div style="display:flex;justify-content:flex-start"><div style="background:#F3F4F6;padding:8px 12px;border-radius:10px;font-size:12px;color:#9CA3AF">Thinking...</div></div>';
+      }
+      html+='</div>';
+    }
+    html+='<div style="padding:8px 10px;border-top:1px solid #E5E7EB;display:flex;gap:6px;background:#fff">';
+    html+='<input id="haikuInput" type="text" placeholder="Ask about cash..." style="flex:1;border:1px solid #D1D5DB;border-radius:20px;padding:6px 12px;font-size:12px;outline:none" onkeydown="if(event.key===\'Enter\')haikuSend()">';
+    html+='<button onclick="haikuSend()" style="background:#E91E8C;color:#fff;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&#8593;</button>';
+    html+='</div>';
+  }
+  el.innerHTML=html;
+  var inp=document.getElementById('haikuInput');
+  if(inp) inp.focus();
+  // scroll messages to bottom
+  var msgDiv=el.querySelector('[style*="overflow-y:auto"]');
+  if(msgDiv) msgDiv.scrollTop=msgDiv.scrollHeight;
+}
+
+function haikuSaveKey(){
+  var k=document.getElementById('haikuKey')?.value.trim();
+  if(k){haiku.apiKey=k;sessionStorage.setItem('anthropic_key',k);haikuRender();}
+}
+
+function haikuSend(text){
+  var inp=document.getElementById('haikuInput');
+  var msg=(text||(inp&&inp.value.trim())||'').trim();
+  if(!msg||haiku.loading) return;
+  if(inp) inp.value='';
+  haiku.messages.push({role:'user',content:msg});
+  haiku.loading=true;
+  haikuRender();
+
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':haiku.apiKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-client-side-allow-unsafe':'true',
+    },
+    body:JSON.stringify({
+      model:'claude-haiku-4-5-20251001',
+      max_tokens:512,
+      system:haikuBuildSystemPrompt(),
+      messages:haiku.messages.map(function(m){return{role:m.role,content:m.content};}),
+    }),
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var reply=(d.content&&d.content[0]&&d.content[0].text)||d.error?.message||'No response';
+    haiku.messages.push({role:'assistant',content:reply});
+    haiku.loading=false;
+    haikuRender();
+  })
+  .catch(function(e){
+    haiku.messages.push({role:'assistant',content:'Error: '+e.message+'. Check your API key.'});
+    haiku.loading=false;
+    haikuRender();
+  });
+}
+
+function haikuToggle(){
+  haiku.open=!haiku.open;
+  var panel=document.getElementById('haikuWidget');
+  if(panel) panel.style.display=haiku.open?'flex':'none';
+  if(haiku.open) haikuRender();
+  document.getElementById('haikuBtn').innerHTML=haiku.open?'✕':'💬';
+}
+
+// Inject chat widget into DOM (outside #app, always present)
+(function(){
+  var widget=document.createElement('div');
+  widget.id='haikuWidget';
+  widget.style.cssText='display:none;position:fixed;bottom:76px;right:24px;width:320px;height:420px;background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);z-index:9999;flex-direction:column;overflow:hidden;border:1px solid #E5E7EB';
+  widget.innerHTML='<div style="background:linear-gradient(135deg,#1A1A2E,#16213E);padding:12px 14px;display:flex;align-items:center;gap:10px"><div style="width:28px;height:28px;border-radius:50%;background:#E91E8C;display:flex;align-items:center;justify-content:center;font-size:14px">✦</div><div><div style="color:#fff;font-weight:700;font-size:13px">Cash Assistant</div><div style="color:#9CA3AF;font-size:10px">Powered by Claude Haiku · '+( cashData?cashData.meta.mode.toUpperCase()+' data':'loading...')+'</div></div><button onclick="haikuToggle()" style="margin-left:auto;background:none;border:none;color:#9CA3AF;font-size:16px;cursor:pointer">✕</button></div><div id="haikuPanel" style="flex:1;overflow:hidden;display:flex;flex-direction:column"></div>';
+  document.body.appendChild(widget);
+
+  var btn=document.createElement('button');
+  btn.id='haikuBtn';
+  btn.innerHTML='💬';
+  btn.onclick=haikuToggle;
+  btn.style.cssText='position:fixed;bottom:24px;right:24px;width:48px;height:48px;border-radius:50%;background:#E91E8C;color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(233,30,140,0.4);z-index:10000;display:flex;align-items:center;justify-content:center;transition:transform .2s';
+  btn.onmouseover=function(){this.style.transform='scale(1.1)';};
+  btn.onmouseout=function(){this.style.transform='scale(1)';};
+  document.body.appendChild(btn);
+})();
+
 // ===== INIT =====
 render();
 </script>
