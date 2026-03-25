@@ -94,6 +94,13 @@ SUPPLIERS = [
     {"name": "Other suppliers",  "share": 0.07, "dpo": 30, "category": "other"},
 ]
 
+# Seasonal DSO adjustment by month (days above/below customer base DSO)
+# Finnish hospitality: customers pay slowest in summer peak (Aug pubs very busy, admin backlog)
+SEASONAL_DSO_FACTOR = {
+    1: -2, 2: -3, 3: -1, 4:  1, 5:  4,
+    6:  6, 7:  9, 8: 11, 9:  5, 10:  1, 11: -1, 12:  3,
+}
+
 
 # ── Procountor API Client ─────────────────────────────────────────────────────
 
@@ -315,6 +322,62 @@ class WorkingCapitalEngine:
                     else:
                         buckets["90_plus"] += amount
         return {k: round(v, 2) for k, v in buckets.items()}
+
+    def monthly_wc_trends(self, months=18):
+        """
+        Monthly DSO/DPO/CCC/revenue trends for Working Capital tab.
+        Shows seasonal patterns over trailing months.
+        """
+        today = date.today()
+        trends = []
+        for i in range(months - 1, -1, -1):
+            # Calculate month N months ago
+            m = (today.month - 1 - i) % 12 + 1
+            y = today.year + ((today.month - 1 - i) // 12)
+            month_start = date(y, m, 1)
+            month_end = date(y, m, monthrange(y, m)[1])
+            label = month_start.strftime('%b %Y')
+
+            paid_sales = [
+                inv for inv in self.sales
+                if inv.get('status') == 'PAID'
+                and self._parse_date(inv.get('date') or inv.get('invoiceDate'))
+                and month_start <= self._parse_date(inv.get('date') or inv.get('invoiceDate')) <= month_end
+            ]
+            dso_vals = [d for d in (self._days_to_pay(inv) for inv in paid_sales) if d is not None]
+            dso = round(sum(dso_vals) / len(dso_vals), 1) if dso_vals else None
+            revenue_billed = sum(float(inv.get('totalAmount', 0)) for inv in paid_sales)
+
+            paid_purch = [
+                inv for inv in self.purchases
+                if inv.get('status') == 'PAID'
+                and self._parse_date(inv.get('date') or inv.get('invoiceDate'))
+                and month_start <= self._parse_date(inv.get('date') or inv.get('invoiceDate')) <= month_end
+            ]
+            dpo_vals = [d for d in (self._days_to_pay(inv) for inv in paid_purch) if d is not None]
+            dpo = round(sum(dpo_vals) / len(dpo_vals), 1) if dpo_vals else None
+            costs_billed = sum(float(inv.get('totalAmount', 0)) for inv in paid_purch)
+
+            days_in_month = monthrange(y, m)[1]
+            ar_at_eom = round(revenue_billed * (dso or 30) / days_in_month, 0) if revenue_billed else 0
+            ap_at_eom = round(costs_billed * (dpo or 21) / days_in_month, 0) if costs_billed else 0
+
+            trends.append({
+                'month': month_start.strftime('%Y-%m'),
+                'label': label,
+                'month_num': m,
+                'revenue_billed': round(revenue_billed, 0),
+                'costs_billed': round(costs_billed, 0),
+                'dso': dso,
+                'dpo': dpo,
+                'ccc': round((dso or 0) - (dpo or 0), 1) if dso and dpo else None,
+                'ar_at_eom': ar_at_eom,
+                'ap_at_eom': ap_at_eom,
+                'wc_need': round(ar_at_eom - ap_at_eom, 0),
+                'ar_pct_revenue': round(ar_at_eom / revenue_billed, 3) if revenue_billed > 0 else None,
+                'data_type': 'actual',
+            })
+        return trends
 
     def monthly_trend(self, months=12):
         """DSO/DPO trend by month for the Working Capital tab."""
@@ -578,6 +641,60 @@ class ForecastBuilder:
         return {"weeks": weeks, "daily": daily}
 
 
+def build_wc_revenue_forecast(dso_by_month, dpo_by_month, months_forward=9):
+    """
+    Forward-looking working capital forecast using LivePlan REVENUES (not cash).
+
+    Key insight: LivePlan cash flow is wrong (doesn't model WC timing).
+    Instead we take LivePlan revenues and apply seasonal DSO to get actual cash timing.
+    This converts "€202K April revenue" into a week-by-week cash collection schedule.
+    """
+    today = date.today()
+    forecast = []
+    prev_ar = 0.0
+
+    for i in range(months_forward):
+        m = (today.month + i - 1) % 12 + 1
+        y = today.year + (today.month + i - 1) // 12
+        plan = LIVEPLAN.get(m, LIVEPLAN.get(12, {}))
+        revenue = plan.get('revenue', 0)
+        days_in_month = monthrange(y, m)[1]
+
+        # Seasonal DSO for this month (from historical averages or base customer DSO)
+        dso = dso_by_month.get(m, 30 + SEASONAL_DSO_FACTOR.get(m, 0))
+        dpo = dpo_by_month.get(m, 22)
+
+        # Cash collected this month = previous AR × collection_rate + current revenue × same-month collection
+        # collection_rate = fraction of DSO cycle that completes within the month
+        same_month_collection = max(0, revenue * (1 - dso / days_in_month)) if dso < days_in_month else 0
+        from_prior_ar = prev_ar * min(1.0, days_in_month / max(dso, 1))
+        cash_in_from_revenue = round(same_month_collection + from_prior_ar, 0)
+
+        ar_at_eom = round(revenue - same_month_collection, 0)
+        costs = plan.get('direct_costs', 0) + plan.get('expenses', 0)
+        ap_at_eom = round(costs * dpo / days_in_month, 0)
+        wc_need = round(ar_at_eom - ap_at_eom, 0)
+
+        forecast.append({
+            'month': date(y, m, 1).strftime('%Y-%m'),
+            'label': date(y, m, 1).strftime('%b %Y'),
+            'month_num': m,
+            'liveplan_revenue': revenue,
+            'projected_dso': dso,
+            'projected_dpo': dpo,
+            'cash_in_from_revenue': cash_in_from_revenue,
+            'ar_at_eom': ar_at_eom,
+            'ap_at_eom': ap_at_eom,
+            'wc_need': wc_need,
+            'ar_pct_revenue': round(ar_at_eom / revenue, 3) if revenue > 0 else 0,
+            'data_type': 'forecast',
+            'note': f'LivePlan revenue €{revenue:,.0f}, DSO {dso}d → €{cash_in_from_revenue:,.0f} cash collected',
+        })
+        prev_ar = ar_at_eom
+
+    return forecast
+
+
 # ── Demo Data Generator ───────────────────────────────────────────────────────
 
 def generate_demo_data(base_date=None):
@@ -672,51 +789,64 @@ def generate_demo_data(base_date=None):
             })
             pinv_id += 1
 
-    # ── Historical invoices for WC analytics (12 months of paid history) ──
+    # ── Historical invoices for WC analytics (18 months of seasonal paid history) ──
     historical = []
-    for months_back in range(1, 13):
-        hist_date = today.replace(day=1) - timedelta(days=months_back * 30)
+    for months_back in range(1, 19):  # 18 months of history
+        # Calculate the month date
+        mb = months_back
+        hist_m = (today.month - mb - 1) % 12 + 1
+        hist_y = today.year + (today.month - mb - 1) // 12
+        hist_date = date(hist_y, hist_m, 1)
         hist_month = hist_date.month
         hist_year = hist_date.year
-        plan = LIVEPLAN.get(hist_month, LIVEPLAN[12])
+
+        # Revenue scaling: 2025 = ~84% of 2026 plan, 2024 = ~70%
+        year_scale = 0.84 if months_back <= 12 else 0.70
+        plan = LIVEPLAN.get(hist_month, LIVEPLAN.get(12, {}))
+        plan_revenue = plan.get('revenue', 150000) * year_scale
+        plan_costs = plan.get('direct_costs', 60000) * year_scale
+
+        days_in_month = monthrange(hist_year, hist_month)[1]
+        seasonal_adj = SEASONAL_DSO_FACTOR.get(hist_month, 0)
 
         for customer in CUSTOMERS:
-            cust_rev = plan["revenue"] * customer["share"]
-            if cust_rev < 500:
+            cust_rev = plan_revenue * customer['share']
+            if cust_rev < 300:
                 continue
-            inv_day = rng.randint(1, 25)
-            inv_date = date(hist_year, hist_month, min(inv_day, monthrange(hist_year, hist_month)[1]))
-            dso = customer["dso"] + rng.randint(-5, 8)  # some variance
-            pay_date = inv_date + timedelta(days=max(dso, 1))
+            inv_day = rng.randint(1, min(20, days_in_month))
+            inv_date = date(hist_year, hist_month, inv_day)
+            # DSO with seasonal adjustment + small random variance
+            dso = max(customer['dso'] + seasonal_adj + rng.randint(-4, 6), 3)
+            pay_date = inv_date + timedelta(days=dso)
             historical.append({
-                "id": inv_id,
-                "type": "SALES_INVOICE",
-                "date": inv_date.isoformat(),
-                "dueDate": (inv_date + timedelta(days=21)).isoformat(),
-                "paymentDate": pay_date.isoformat(),
-                "counterpartyName": customer["name"],
-                "totalAmount": round(cust_rev * rng.uniform(0.9, 1.1), 2),
-                "status": "PAID",
-                "currency": "EUR",
+                'id': inv_id,
+                'type': 'SALES_INVOICE',
+                'date': inv_date.isoformat(),
+                'dueDate': (inv_date + timedelta(days=21)).isoformat(),
+                'paymentDate': pay_date.isoformat(),
+                'counterpartyName': customer['name'],
+                'totalAmount': round(cust_rev * rng.uniform(0.88, 1.12), 2),
+                'status': 'PAID',
+                'currency': 'EUR',
             })
             inv_id += 1
 
         for supplier in SUPPLIERS:
-            sup_cost = plan["direct_costs"] * supplier["share"]
-            inv_day = rng.randint(1, 20)
-            inv_date = date(hist_year, hist_month, min(inv_day, monthrange(hist_year, hist_month)[1]))
-            dpo = supplier["dpo"] + rng.randint(-3, 5)
-            pay_date = inv_date + timedelta(days=max(dpo, 1))
+            sup_cost = plan_costs * supplier['share']
+            inv_day = rng.randint(1, min(15, days_in_month))
+            inv_date = date(hist_year, hist_month, inv_day)
+            dpo = max(supplier['dpo'] + rng.randint(-3, 5), 5)
+            pay_date = inv_date + timedelta(days=dpo)
             historical.append({
-                "id": pinv_id,
-                "type": "PURCHASE_INVOICE",
-                "date": inv_date.isoformat(),
-                "dueDate": (inv_date + timedelta(days=supplier["dpo"])).isoformat(),
-                "paymentDate": pay_date.isoformat(),
-                "counterpartyName": supplier["name"],
-                "totalAmount": round(sup_cost * rng.uniform(0.9, 1.1), 2),
-                "status": "PAID",
-                "currency": "EUR",
+                'id': pinv_id,
+                'type': 'PURCHASE_INVOICE',
+                'date': inv_date.isoformat(),
+                'dueDate': (inv_date + timedelta(days=supplier['dpo'])).isoformat(),
+                'paymentDate': pay_date.isoformat(),
+                'counterpartyName': supplier['name'],
+                'totalAmount': round(sup_cost * rng.uniform(0.88, 1.12), 2),
+                'status': 'PAID',
+                'currency': 'EUR',
             })
             pinv_id += 1
 
@@ -731,6 +861,20 @@ def generate_demo_data(base_date=None):
     ar_aging = wc.ar_aging(today)
     ap_aging = wc.ap_aging(today)
     monthly_trend = wc.monthly_trend(12)
+    monthly_wc_trends = wc.monthly_wc_trends(18)
+
+    # Build seasonal DSO/DPO averages by month number for WC revenue forecast
+    dso_by_month = {}
+    dpo_by_month = {}
+    for t in monthly_wc_trends:
+        m = t['month_num']
+        if t['dso']:
+            dso_by_month.setdefault(m, []).append(t['dso'])
+        if t['dpo']:
+            dpo_by_month.setdefault(m, []).append(t['dpo'])
+    dso_by_month_avg = {m: round(sum(v)/len(v), 1) for m, v in dso_by_month.items()}
+    dpo_by_month_avg = {m: round(sum(v)/len(v), 1) for m, v in dpo_by_month.items()}
+    wc_revenue_forecast = build_wc_revenue_forecast(dso_by_month_avg, dpo_by_month_avg, months_forward=9)
 
     # ── 13-Week Forecast ────────────────────────────────────────────────────
     forecast = ForecastBuilder(
@@ -799,6 +943,10 @@ def generate_demo_data(base_date=None):
             "ar_aging": ar_aging,
             "ap_aging": ap_aging,
             "monthly_trend": monthly_trend,
+            "monthly_wc_trends": monthly_wc_trends,
+            "wc_revenue_forecast": wc_revenue_forecast,
+            "dso_by_month": dso_by_month_avg,
+            "dpo_by_month": dpo_by_month_avg,
         },
         "forecast": forecast,
         "liveplan": {m: v for m, v in LIVEPLAN.items()},

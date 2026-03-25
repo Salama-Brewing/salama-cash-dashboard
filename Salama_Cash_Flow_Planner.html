@@ -672,7 +672,7 @@ function render(){
 
   // Tabs
   html += '<div class="tabs">';
-  ["Scenario","People","Costs","Bemb\u00F6le","Stress Test","Top 10 Offenders","Cash Position","Receivables","Payables"].forEach(function(t){
+  ["Scenario","People","Costs","Bemb\u00F6le","Stress Test","Top 10 Offenders","Cash Position","Receivables","Payables","Working Capital"].forEach(function(t){
     html += '<button class="tab'+(state.activeTab===t?' active':'')+'" onclick="switchTab(\''+t+'\')">'+t+'</button>';
   });
   html += '</div></div>';
@@ -1206,6 +1206,96 @@ function render(){
     });
   }
 
+  // ========================== WORKING CAPITAL TAB ==========================
+  if(state.activeTab==="Working Capital"){
+    if(!cashData){html+='<div class="alert alert-gray">Loading data...</div>';}
+    else{
+      var wc=cashData.working_capital;
+      var trends=wc.monthly_wc_trends||[];
+      var fcast=wc.wc_revenue_forecast||[];
+      var dsoMon=wc.dso_by_month||{};
+      var dpoMon=wc.dpo_by_month||{};
+
+      // Peak/trough analysis
+      var validTrends=trends.filter(function(t){return t.dso&&t.revenue_billed>0;});
+      var peakDSO=validTrends.length?validTrends.reduce(function(a,b){return b.dso>a.dso?b:a;}):null;
+      var troughDSO=validTrends.length?validTrends.reduce(function(a,b){return b.dso<a.dso?b:a;}):null;
+      var peakWC=validTrends.length?validTrends.reduce(function(a,b){return b.wc_need>a.wc_need?b:a;}):null;
+
+      html+='<div class="alert alert-blue">Working capital analytics — 18 months of actual payment history + forward prediction from LivePlan revenues. DSO shows how long customers really take to pay. The gap between DSO and DPO drives your financing need.</div>';
+
+      html+='<div class="grid4">';
+      html+='<div class="card"><div class="kpi-label">DSO Overall (12m avg)</div><div class="kpi-value">'+wc.dso_overall+'d</div><div class="kpi-sub">Days customers take to pay</div></div>';
+      html+='<div class="card"><div class="kpi-label">DPO Overall (12m avg)</div><div class="kpi-value">'+wc.dpo_overall+'d</div><div class="kpi-sub">Days you take to pay suppliers</div></div>';
+      html+='<div class="card"><div class="kpi-label">Cash Conversion Cycle</div><div class="kpi-value" style="color:'+(wc.ccc>15?'#EA580C':wc.ccc>8?'#D97706':'#16A34A')+'">'+wc.ccc+'d</div><div class="kpi-sub">DSO − DPO. Lower is better cash</div></div>';
+      if(peakWC){html+='<div class="card"><div class="kpi-label">Peak WC Need ('+peakWC.label+')</div><div class="kpi-value txt-org">'+fmtE(peakWC.wc_need)+'</div><div class="kpi-sub">AR − AP at peak season</div></div>';}
+      html+='</div>';
+
+      // Seasonal pattern insight
+      if(peakDSO&&troughDSO){
+        html+='<div class="alert alert-amber" style="margin-top:0"><strong>Seasonal pattern:</strong> DSO peaks in '+peakDSO.label+' ('+peakDSO.dso+'d) and troughs in '+troughDSO.label+' ('+troughDSO.dso+'d). That\'s a '+Math.round(peakDSO.dso-troughDSO.dso)+'d swing — customers (especially bars & pubs) pay much slower during peak summer season. This creates a cash crunch in Aug–Sep even when revenue is highest.</div>';
+      }
+
+      html+='<div class="grid2">';
+
+      // Chart 1: DSO/DPO/CCC trend
+      html+='<div class="card"><div class="section-title">DSO / DPO / CCC — 18 Month Trend</div>';
+      html+='<div style="font-size:11px;color:#9CA3AF;margin-bottom:6px">Actual payment history. Seasonal pattern clearly visible — peak summer DSO drives working capital crunch.</div>';
+      html+='<div class="chart-container" style="height:240px"><canvas id="wcTrendChart"></canvas></div></div>';
+
+      // Chart 2: Revenue vs AR outstanding (the lag problem visualised)
+      html+='<div class="card"><div class="section-title">Revenue Billed vs AR Outstanding</div>';
+      html+='<div style="font-size:11px;color:#9CA3AF;margin-bottom:6px">Orange bars = revenue invoiced. Blue line = AR still outstanding at month-end. Gap = cash you\'re waiting to collect.</div>';
+      html+='<div class="chart-container" style="height:240px"><canvas id="wcArRevenueChart"></canvas></div></div>';
+
+      html+='</div>'; // end grid2
+
+      // Forward-looking WC forecast using LivePlan revenues
+      html+='<div class="card"><div class="section-title">Forward Working Capital Forecast — LivePlan Revenue → Cash Collection</div>';
+      html+='<div style="font-size:11px;color:#9CA3AF;margin-bottom:10px">Uses LivePlan <strong>revenues</strong> (not cash) × seasonal DSO to predict actual cash timing. Apr €202K billed at 30d DSO → ~€169K cash collected in April, €33K arrives in May. This is why LivePlan\'s cash forecast is wrong.</div>';
+      html+='<table><thead><tr><th style="text-align:left">Month</th><th>LivePlan Revenue</th><th>Proj. DSO</th><th>Cash Collected</th><th>AR at Month-End</th><th>WC Need</th><th>AR %Rev</th></tr></thead><tbody>';
+      fcast.forEach(function(f){
+        var arPct=Math.round((f.ar_pct_revenue||0)*100);
+        var arCol=arPct>120?'#DC2626':arPct>95?'#EA580C':arPct>75?'#D97706':'#16A34A';
+        html+='<tr><td style="text-align:left;font-weight:600">'+f.label+'</td>';
+        html+='<td>'+fmtE(f.liveplan_revenue)+'</td>';
+        html+='<td style="color:#6B7280;font-weight:400">'+f.projected_dso+'d</td>';
+        html+='<td class="txt-grn bold">'+fmtE(f.cash_in_from_revenue)+'</td>';
+        html+='<td class="txt-org">'+fmtE(f.ar_at_eom)+'</td>';
+        html+='<td>'+fmtE(f.wc_need)+'</td>';
+        html+='<td><span style="background:'+(arPct>95?'#FEF9C3':'#DCFCE7')+';color:'+arCol+';padding:2px 6px;border-radius:4px;font-size:11px">'+arPct+'%</span></td></tr>';
+      });
+      html+='</tbody></table>';
+      html+='<div style="margin-top:10px;font-size:11px;color:#9CA3AF">AR% Revenue >100% means you\'re carrying more than a full month\'s billings as outstanding — common in peak summer. This needs to be financed by the credit line or bridge.</div>';
+      html+='</div>';
+
+      // Customer DSO table
+      html+='<div class="grid2">';
+      html+='<div class="card"><div class="section-title">DSO by Customer (12m avg)</div>';
+      html+='<table><thead><tr><th style="text-align:left">Customer</th><th>DSO (avg)</th><th>Payment Speed</th></tr></thead><tbody>';
+      Object.entries(wc.by_customer).sort(function(a,b){return b[1]-a[1];}).forEach(function(e){
+        var dso=e[1];
+        var col=dso>45?'#DC2626':dso>30?'#EA580C':dso>15?'#D97706':'#16A34A';
+        var label=dso>45?'Slow payer':dso>30?'Average':dso>15?'Good':'Immediate';
+        html+='<tr><td style="text-align:left">'+e[0]+'</td>';
+        html+='<td style="color:'+col+';font-weight:700">'+dso+'d</td>';
+        html+='<td><span style="font-size:11px;background:'+(dso>45?'#FEE2E2':dso>30?'#FEF9C3':'#DCFCE7')+';color:'+col+';padding:2px 6px;border-radius:4px">'+label+'</span></td></tr>';
+      });
+      html+='</tbody></table></div>';
+
+      html+='<div class="card"><div class="section-title">DPO by Supplier (12m avg)</div>';
+      html+='<table><thead><tr><th style="text-align:left">Supplier</th><th>DPO (avg)</th><th>Terms Used</th></tr></thead><tbody>';
+      Object.entries(wc.by_supplier).sort(function(a,b){return b[1]-a[1];}).forEach(function(e){
+        var dpo=e[1];
+        html+='<tr><td style="text-align:left">'+e[0]+'</td>';
+        html+='<td style="font-weight:700">'+dpo+'d</td>';
+        html+='<td style="color:#6B7280;font-size:11px;font-weight:400">'+(dpo<15?'Paying early — extend terms?':dpo<25?'Normal':'Stretching')+'</td></tr>';
+      });
+      html+='</tbody></table></div>';
+      html+='</div>'; // end grid2
+    }
+  }
+
   // ========================== CASH POSITION TAB ==========================
   if(state.activeTab==="Cash Position"){
     if(!cashData){html+='<div class="alert alert-gray">Loading live cash data...</div>';}
@@ -1445,6 +1535,7 @@ function render(){
 
   if(state.activeTab==="Scenario") drawChart(proj);
   if(state.activeTab==="Cash Position" && cashData) drawCashForecastChart();
+  if(state.activeTab==="Working Capital" && cashData) drawWCCharts();
 }
 
 // ===== CHART =====
@@ -1522,6 +1613,67 @@ function drawChart(proj){
       }
     }
   });
+}
+
+// ===== WORKING CAPITAL CHARTS =====
+function drawWCCharts(){
+  if(!cashData||typeof Chart==='undefined'){
+    if(typeof Chart==='undefined'){setTimeout(drawWCCharts,300);}
+    return;
+  }
+  var wc=cashData.working_capital;
+  var trends=(wc.monthly_wc_trends||[]).slice(-18);
+
+  // Chart 1: DSO/DPO/CCC trend
+  var c1=document.getElementById('wcTrendChart');
+  if(c1){
+    if(cashCharts.wcTrend){cashCharts.wcTrend.destroy();}
+    cashCharts.wcTrend=new Chart(c1,{
+      type:'line',
+      data:{
+        labels:trends.map(function(t){return t.label;}),
+        datasets:[
+          {label:'DSO',data:trends.map(function(t){return t.dso;}),borderColor:'#DC2626',backgroundColor:'rgba(220,38,38,0.08)',borderWidth:2.5,pointRadius:3,tension:0.3,fill:false},
+          {label:'DPO',data:trends.map(function(t){return t.dpo;}),borderColor:'#2563EB',backgroundColor:'rgba(37,99,235,0.08)',borderWidth:2.5,pointRadius:3,tension:0.3,fill:false},
+          {label:'CCC',data:trends.map(function(t){return t.ccc;}),borderColor:'#E91E8C',backgroundColor:'rgba(233,30,140,0.08)',borderWidth:2,pointRadius:3,tension:0.3,fill:true,borderDash:[4,4]}
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:12}},
+          tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': '+ctx.parsed.y+' days';}}}},
+        scales:{
+          x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45}},
+          y:{ticks:{callback:function(v){return v+'d';}},grid:{color:'#F3F4F6'},min:0}
+        }
+      }
+    });
+  }
+
+  // Chart 2: Revenue vs AR outstanding
+  var c2=document.getElementById('wcArRevenueChart');
+  if(c2){
+    if(cashCharts.wcAR){cashCharts.wcAR.destroy();}
+    cashCharts.wcAR=new Chart(c2,{
+      type:'bar',
+      data:{
+        labels:trends.map(function(t){return t.label;}),
+        datasets:[
+          {label:'Revenue Billed',data:trends.map(function(t){return t.revenue_billed;}),backgroundColor:'rgba(234,179,8,0.5)',borderRadius:3,order:2},
+          {label:'AR Outstanding',data:trends.map(function(t){return t.ar_at_eom;}),type:'line',borderColor:'#2563EB',backgroundColor:'transparent',borderWidth:2.5,pointRadius:3,tension:0.3,order:1}
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:12}},
+          tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': '+fmtE(ctx.parsed.y);}}}},
+        scales:{
+          x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45}},
+          y:{ticks:{callback:function(v){return fmtK(v);}},grid:{color:'#F3F4F6'}}
+        }
+      }
+    });
+  }
 }
 
 // ===== CASH FORECAST CHART =====
