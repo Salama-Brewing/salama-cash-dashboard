@@ -1,0 +1,2927 @@
+{
+  "meta": {
+    "generated_at": "2026-03-25T21:17:02.989419",
+    "mode": "demo",
+    "base_date": "2026-03-25",
+    "company": "Salama Brewing Company Oy",
+    "scenario": "original"
+  },
+  "bank": {
+    "balance": -5200,
+    "balance_date": "2026-03-25",
+    "note": "Demo data — approximate balance after Mar 25 tax payment of €30,060",
+    "procountor_eom_forecast": -64138,
+    "liveplan_eom_forecast": 10391,
+    "gap_explanation": "€74K gap = working capital timing LivePlan cannot model"
+  },
+  "receivables": {
+    "total_open": 214900.49,
+    "invoice_count": 25,
+    "aging": {
+      "0_30": 214900.49,
+      "31_60": 0,
+      "61_90": 0,
+      "90_plus": 0
+    },
+    "by_customer": [
+      {
+        "name": "Bars & Pubs FI",
+        "amount": 43812.23
+      },
+      {
+        "name": "Other Export",
+        "amount": 39501.55
+      },
+      {
+        "name": "Export (Brill)",
+        "amount": 28636.75
+      },
+      {
+        "name": "Kesko (direct)",
+        "amount": 28566.87
+      },
+      {
+        "name": "SOK Central",
+        "amount": 18585.52
+      },
+      {
+        "name": "Espoo Shop",
+        "amount": 15747.7
+      },
+      {
+        "name": "Online Shop",
+        "amount": 13970.27
+      },
+      {
+        "name": "Salama Own Bars",
+        "amount": 10135.36
+      },
+      {
+        "name": "Alko",
+        "amount": 5749.97
+      },
+      {
+        "name": "Systembolaget",
+        "amount": 5347.09
+      },
+      {
+        "name": "SOK Bars",
+        "amount": 4847.18
+      }
+    ],
+    "invoices": [
+      {
+        "id": 1000,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-01",
+        "dueDate": "2026-03-23",
+        "counterpartyName": "Kesko (direct)",
+        "totalAmount": 9860.42,
+        "status": "OVERDUE",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-03-26"
+      },
+      {
+        "id": 1001,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-05",
+        "dueDate": "2026-03-22",
+        "counterpartyName": "Kesko (direct)",
+        "totalAmount": 8740.2,
+        "status": "OVERDUE",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-03-30"
+      },
+      {
+        "id": 1002,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-18",
+        "dueDate": "2026-04-03",
+        "counterpartyName": "Kesko (direct)",
+        "totalAmount": 9966.25,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-04-12"
+      },
+      {
+        "id": 1003,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-02",
+        "dueDate": "2026-03-16",
+        "counterpartyName": "SOK Central",
+        "totalAmount": 10019.69,
+        "status": "OVERDUE",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-04-06"
+      },
+      {
+        "id": 1004,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-08",
+        "dueDate": "2026-04-07",
+        "counterpartyName": "SOK Central",
+        "totalAmount": 8565.83,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-04-12"
+      },
+      {
+        "id": 1005,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-18",
+        "dueDate": "2026-04-07",
+        "counterpartyName": "SOK Bars",
+        "totalAmount": 4847.18,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-04-22"
+      },
+      {
+        "id": 1006,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-18",
+        "dueDate": "2026-04-14",
+        "counterpartyName": "Alko",
+        "totalAmount": 5749.97,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-04-07"
+      },
+      {
+        "id": 1007,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-19",
+        "dueDate": "2026-04-10",
+        "counterpartyName": "Espoo Shop",
+        "totalAmount": 7181.31,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-03-19"
+      },
+      {
+        "id": 1008,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-01",
+        "dueDate": "2026-03-20",
+        "counterpartyName": "Espoo Shop",
+        "totalAmount": 8566.39,
+        "status": "OVERDUE",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-03-01"
+      },
+      {
+        "id": 1009,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-11",
+        "dueDate": "2026-04-02",
+        "counterpartyName": "Online Shop",
+        "totalAmount": 7566.48,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-03-14"
+      },
+      {
+        "id": 1010,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-11",
+        "dueDate": "2026-03-28",
+        "counterpartyName": "Online Shop",
+        "totalAmount": 6403.79,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-03-14"
+      },
+      {
+        "id": 1011,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-04",
+        "dueDate": "2026-03-29",
+        "counterpartyName": "Bars & Pubs FI",
+        "totalAmount": 8206.26,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-04-13"
+      },
+      {
+        "id": 1012,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-20",
+        "dueDate": "2026-04-11",
+        "counterpartyName": "Bars & Pubs FI",
+        "totalAmount": 10322.97,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-04-29"
+      },
+      {
+        "id": 1013,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-15",
+        "dueDate": "2026-04-01",
+        "counterpartyName": "Bars & Pubs FI",
+        "totalAmount": 10209.76,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-04-24"
+      },
+      {
+        "id": 1014,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-13",
+        "dueDate": "2026-03-29",
+        "counterpartyName": "Export (Brill)",
+        "totalAmount": 9846.45,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-05-02"
+      },
+      {
+        "id": 1015,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-20",
+        "dueDate": "2026-04-14",
+        "counterpartyName": "Export (Brill)",
+        "totalAmount": 8757.22,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-05-09"
+      },
+      {
+        "id": 1016,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-03",
+        "dueDate": "2026-03-18",
+        "counterpartyName": "Systembolaget",
+        "totalAmount": 5347.09,
+        "status": "OVERDUE",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-04-17"
+      },
+      {
+        "id": 1017,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-10",
+        "dueDate": "2026-03-26",
+        "counterpartyName": "Salama Own Bars",
+        "totalAmount": 4930.78,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-03-10"
+      },
+      {
+        "id": 1018,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-04",
+        "dueDate": "2026-03-30",
+        "counterpartyName": "Salama Own Bars",
+        "totalAmount": 5204.58,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-03-04"
+      },
+      {
+        "id": 1019,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-12",
+        "dueDate": "2026-03-31",
+        "counterpartyName": "Other Export",
+        "totalAmount": 8183.76,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-05-06"
+      },
+      {
+        "id": 1020,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-07",
+        "dueDate": "2026-03-29",
+        "counterpartyName": "Other Export",
+        "totalAmount": 8426.3,
+        "status": "UNPAID",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-05-01"
+      },
+      {
+        "id": 1021,
+        "type": "SALES_INVOICE",
+        "date": "2026-03-03",
+        "dueDate": "2026-03-22",
+        "counterpartyName": "Other Export",
+        "totalAmount": 9298.62,
+        "status": "OVERDUE",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-04-27"
+      },
+      {
+        "id": 1022,
+        "type": "SALES_INVOICE",
+        "date": "2026-02-17",
+        "dueDate": "2026-03-10",
+        "counterpartyName": "Bars & Pubs FI",
+        "totalAmount": 15073.24,
+        "status": "OVERDUE",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-03-30"
+      },
+      {
+        "id": 1023,
+        "type": "SALES_INVOICE",
+        "date": "2026-02-18",
+        "dueDate": "2026-03-11",
+        "counterpartyName": "Other Export",
+        "totalAmount": 13592.87,
+        "status": "OVERDUE",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-04-07"
+      },
+      {
+        "id": 1024,
+        "type": "SALES_INVOICE",
+        "date": "2026-02-17",
+        "dueDate": "2026-03-10",
+        "counterpartyName": "Export (Brill)",
+        "totalAmount": 10033.08,
+        "status": "OVERDUE",
+        "currency": "EUR",
+        "expectedPaymentDate": "2026-04-07"
+      }
+    ]
+  },
+  "payables": {
+    "total_open": 74397.97,
+    "invoice_count": 8,
+    "aging": {
+      "0_30": 74397.97,
+      "31_60": 0,
+      "61_90": 0,
+      "90_plus": 0
+    },
+    "by_supplier": [
+      {
+        "name": "Malt & grain",
+        "amount": 22167.5
+      },
+      {
+        "name": "Cans & packaging",
+        "amount": 17158.55
+      },
+      {
+        "name": "Alko excise tax",
+        "amount": 15927.7
+      },
+      {
+        "name": "Logistics",
+        "amount": 7634.64
+      },
+      {
+        "name": "Hops",
+        "amount": 6229.32
+      },
+      {
+        "name": "Other suppliers",
+        "amount": 5280.26
+      }
+    ],
+    "invoices": [
+      {
+        "id": 5000,
+        "type": "PURCHASE_INVOICE",
+        "date": "2026-03-13",
+        "dueDate": "2026-04-12",
+        "counterpartyName": "Malt & grain",
+        "totalAmount": 10588.05,
+        "status": "UNPAID",
+        "currency": "EUR"
+      },
+      {
+        "id": 5001,
+        "type": "PURCHASE_INVOICE",
+        "date": "2026-03-04",
+        "dueDate": "2026-04-03",
+        "counterpartyName": "Malt & grain",
+        "totalAmount": 11579.45,
+        "status": "UNPAID",
+        "currency": "EUR"
+      },
+      {
+        "id": 5002,
+        "type": "PURCHASE_INVOICE",
+        "date": "2026-03-13",
+        "dueDate": "2026-04-03",
+        "counterpartyName": "Hops",
+        "totalAmount": 6229.32,
+        "status": "UNPAID",
+        "currency": "EUR"
+      },
+      {
+        "id": 5003,
+        "type": "PURCHASE_INVOICE",
+        "date": "2026-03-05",
+        "dueDate": "2026-03-19",
+        "counterpartyName": "Cans & packaging",
+        "totalAmount": 8807.22,
+        "status": "OVERDUE",
+        "currency": "EUR"
+      },
+      {
+        "id": 5004,
+        "type": "PURCHASE_INVOICE",
+        "date": "2026-03-15",
+        "dueDate": "2026-03-29",
+        "counterpartyName": "Cans & packaging",
+        "totalAmount": 8351.33,
+        "status": "UNPAID",
+        "currency": "EUR"
+      },
+      {
+        "id": 5005,
+        "type": "PURCHASE_INVOICE",
+        "date": "2026-03-15",
+        "dueDate": "2026-03-25",
+        "counterpartyName": "Alko excise tax",
+        "totalAmount": 15927.7,
+        "status": "UNPAID",
+        "currency": "EUR"
+      },
+      {
+        "id": 5006,
+        "type": "PURCHASE_INVOICE",
+        "date": "2026-03-04",
+        "dueDate": "2026-03-25",
+        "counterpartyName": "Logistics",
+        "totalAmount": 7634.64,
+        "status": "UNPAID",
+        "currency": "EUR"
+      },
+      {
+        "id": 5007,
+        "type": "PURCHASE_INVOICE",
+        "date": "2026-03-07",
+        "dueDate": "2026-04-06",
+        "counterpartyName": "Other suppliers",
+        "totalAmount": 5280.26,
+        "status": "UNPAID",
+        "currency": "EUR"
+      }
+    ]
+  },
+  "working_capital": {
+    "dso_overall": 30.1,
+    "dpo_overall": 21.7,
+    "ccc": 8.4,
+    "by_customer": {
+      "Kesko (direct)": 28.3,
+      "SOK Central": 38.7,
+      "SOK Bars": 34.8,
+      "Alko": 20.9,
+      "Espoo Shop": 3.0,
+      "Online Shop": 5.3,
+      "Bars & Pubs FI": 40.6,
+      "Export (Brill)": 50.5,
+      "Systembolaget": 48.2,
+      "Salama Own Bars": 2.5,
+      "Other Export": 57.4
+    },
+    "by_supplier": {
+      "Malt & grain": 30.3,
+      "Hops": 20.9,
+      "Cans & packaging": 16.0,
+      "Alko excise tax": 10.6,
+      "Logistics": 22.1,
+      "Other suppliers": 30.3
+    },
+    "ar_aging": {
+      "0_30": 214900.49,
+      "31_60": 0,
+      "61_90": 0,
+      "90_plus": 0
+    },
+    "ap_aging": {
+      "0_30": 74397.97,
+      "31_60": 0,
+      "61_90": 0,
+      "90_plus": 0
+    },
+    "monthly_trend": [
+      {
+        "month": "Apr 2025",
+        "dso": 45.0,
+        "dpo": 11.5
+      },
+      {
+        "month": "May 2025",
+        "dso": null,
+        "dpo": null
+      },
+      {
+        "month": "Jun 2025",
+        "dso": 28.0,
+        "dpo": null
+      },
+      {
+        "month": "Jul 2025",
+        "dso": null,
+        "dpo": null
+      },
+      {
+        "month": "Aug 2025",
+        "dso": null,
+        "dpo": null
+      },
+      {
+        "month": "Sep 2025",
+        "dso": null,
+        "dpo": null
+      },
+      {
+        "month": "Oct 2025",
+        "dso": null,
+        "dpo": null
+      },
+      {
+        "month": "Oct 2025",
+        "dso": 28.5,
+        "dpo": 21.5
+      },
+      {
+        "month": "Nov 2025",
+        "dso": 30.1,
+        "dpo": 20.3
+      },
+      {
+        "month": "Dec 2025",
+        "dso": 29.6,
+        "dpo": 21.1
+      },
+      {
+        "month": "Jan 2026",
+        "dso": 29.9,
+        "dpo": 23.5
+      },
+      {
+        "month": "Feb 2026",
+        "dso": null,
+        "dpo": null
+      }
+    ]
+  },
+  "forecast": {
+    "weeks": [
+      {
+        "week": 1,
+        "label": "W1: 2026-03-25 – 2026-03-31",
+        "start_date": "2026-03-25",
+        "end_date": "2026-03-31",
+        "opening_balance": -5200,
+        "cash_in": 64786.99,
+        "cash_out": -79788.89,
+        "net": -15001.9,
+        "closing_balance": -20201.9,
+        "confidence": "high"
+      },
+      {
+        "week": 2,
+        "label": "W2: 2026-04-01 – 2026-04-07",
+        "start_date": "2026-04-01",
+        "end_date": "2026-04-07",
+        "opening_balance": -20201.9,
+        "cash_in": 14490.17,
+        "cash_out": -37845.03,
+        "net": -23354.86,
+        "closing_balance": -43556.76,
+        "confidence": "high"
+      },
+      {
+        "week": 3,
+        "label": "W3: 2026-04-08 – 2026-04-14",
+        "start_date": "2026-04-08",
+        "end_date": "2026-04-14",
+        "opening_balance": -43556.76,
+        "cash_in": 28259.03,
+        "cash_out": -12788.05,
+        "net": 15470.98,
+        "closing_balance": -28085.78,
+        "confidence": "high"
+      },
+      {
+        "week": 4,
+        "label": "W4: 2026-04-15 – 2026-04-21",
+        "start_date": "2026-04-15",
+        "end_date": "2026-04-21",
+        "opening_balance": -28085.78,
+        "cash_in": 42319.22,
+        "cash_out": -25413,
+        "net": 16906.22,
+        "closing_balance": -11179.56,
+        "confidence": "high"
+      },
+      {
+        "week": 5,
+        "label": "W5: 2026-04-22 – 2026-04-28",
+        "start_date": "2026-04-22",
+        "end_date": "2026-04-28",
+        "opening_balance": -11179.56,
+        "cash_in": 57311.12,
+        "cash_out": -56180.8,
+        "net": 1130.32,
+        "closing_balance": -10049.24,
+        "confidence": "medium"
+      },
+      {
+        "week": 6,
+        "label": "W6: 2026-04-29 – 2026-05-05",
+        "start_date": "2026-04-29",
+        "end_date": "2026-05-05",
+        "opening_balance": -10049.24,
+        "cash_in": 84995.7,
+        "cash_out": -62580.8,
+        "net": 22414.9,
+        "closing_balance": 12365.66,
+        "confidence": "medium"
+      },
+      {
+        "week": 7,
+        "label": "W7: 2026-05-06 – 2026-05-12",
+        "start_date": "2026-05-06",
+        "end_date": "2026-05-12",
+        "opening_balance": 12365.66,
+        "cash_in": 63177.33,
+        "cash_out": -33817.19,
+        "net": 29360.14,
+        "closing_balance": 41725.8,
+        "confidence": "medium"
+      },
+      {
+        "week": 8,
+        "label": "W8: 2026-05-13 – 2026-05-19",
+        "start_date": "2026-05-13",
+        "end_date": "2026-05-19",
+        "opening_balance": 41725.8,
+        "cash_in": 46236.35,
+        "cash_out": -57030.19,
+        "net": -10793.84,
+        "closing_balance": 30931.96,
+        "confidence": "low"
+      },
+      {
+        "week": 9,
+        "label": "W9: 2026-05-20 – 2026-05-26",
+        "start_date": "2026-05-20",
+        "end_date": "2026-05-26",
+        "opening_balance": 30931.96,
+        "cash_in": 46236.35,
+        "cash_out": -31617.19,
+        "net": 14619.16,
+        "closing_balance": 45551.12,
+        "confidence": "low"
+      },
+      {
+        "week": 10,
+        "label": "W10: 2026-05-27 – 2026-06-02",
+        "start_date": "2026-05-27",
+        "end_date": "2026-06-02",
+        "opening_balance": 45551.12,
+        "cash_in": 46236.35,
+        "cash_out": -70685.19,
+        "net": -24448.84,
+        "closing_balance": 21102.28,
+        "confidence": "low"
+      },
+      {
+        "week": 11,
+        "label": "W11: 2026-06-03 – 2026-06-09",
+        "start_date": "2026-06-03",
+        "end_date": "2026-06-09",
+        "opening_balance": 21102.28,
+        "cash_in": 48941.67,
+        "cash_out": -48295.8,
+        "net": 645.87,
+        "closing_balance": 21748.15,
+        "confidence": "low"
+      },
+      {
+        "week": 12,
+        "label": "W12: 2026-06-10 – 2026-06-16",
+        "start_date": "2026-06-10",
+        "end_date": "2026-06-16",
+        "opening_balance": 21748.15,
+        "cash_in": 48941.67,
+        "cash_out": -61152.8,
+        "net": -12211.13,
+        "closing_balance": 9537.02,
+        "confidence": "low"
+      },
+      {
+        "week": 13,
+        "label": "W13: 2026-06-17 – 2026-06-23",
+        "start_date": "2026-06-17",
+        "end_date": "2026-06-23",
+        "opening_balance": 9537.02,
+        "cash_in": 48941.67,
+        "cash_out": -33539.8,
+        "net": 15401.87,
+        "closing_balance": 24938.89,
+        "confidence": "low"
+      }
+    ],
+    "daily": [
+      {
+        "date": "2026-03-25",
+        "opening": -5200,
+        "cash_in": 0,
+        "cash_out": -32369.56,
+        "closing": -37569.56,
+        "events": [
+          {
+            "date": "2026-03-25",
+            "amount": -8807.22,
+            "description": "Payable: Cans & packaging",
+            "type": "payable",
+            "category": "purchase",
+            "invoice_id": 5003,
+            "supplier": "Cans & packaging",
+            "confidence": "high"
+          },
+          {
+            "date": "2026-03-25",
+            "amount": -15927.7,
+            "description": "Payable: Alko excise tax",
+            "type": "payable",
+            "category": "purchase",
+            "invoice_id": 5005,
+            "supplier": "Alko excise tax",
+            "confidence": "high"
+          },
+          {
+            "date": "2026-03-25",
+            "amount": -7634.64,
+            "description": "Payable: Logistics",
+            "type": "payable",
+            "category": "purchase",
+            "invoice_id": 5006,
+            "supplier": "Logistics",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-03-26",
+        "opening": -37569.56,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": -37569.56,
+        "events": []
+      },
+      {
+        "date": "2026-03-27",
+        "opening": -37569.56,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": -37569.56,
+        "events": []
+      },
+      {
+        "date": "2026-03-28",
+        "opening": -37569.56,
+        "cash_in": 39853.33,
+        "cash_out": -23712,
+        "closing": -21428.23,
+        "events": [
+          {
+            "date": "2026-03-28",
+            "amount": -23712,
+            "description": "Salary (2nd)",
+            "type": "fixed_outflow",
+            "category": "payroll"
+          },
+          {
+            "date": "2026-03-28",
+            "amount": 7181.31,
+            "description": "Receivable: Espoo Shop",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1007,
+            "customer": "Espoo Shop",
+            "confidence": "high"
+          },
+          {
+            "date": "2026-03-28",
+            "amount": 8566.39,
+            "description": "Receivable: Espoo Shop",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1008,
+            "customer": "Espoo Shop",
+            "confidence": "high"
+          },
+          {
+            "date": "2026-03-28",
+            "amount": 7566.48,
+            "description": "Receivable: Online Shop",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1009,
+            "customer": "Online Shop",
+            "confidence": "high"
+          },
+          {
+            "date": "2026-03-28",
+            "amount": 6403.79,
+            "description": "Receivable: Online Shop",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1010,
+            "customer": "Online Shop",
+            "confidence": "high"
+          },
+          {
+            "date": "2026-03-28",
+            "amount": 4930.78,
+            "description": "Receivable: Salama Own Bars",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1017,
+            "customer": "Salama Own Bars",
+            "confidence": "high"
+          },
+          {
+            "date": "2026-03-28",
+            "amount": 5204.58,
+            "description": "Receivable: Salama Own Bars",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1018,
+            "customer": "Salama Own Bars",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-03-29",
+        "opening": -21428.23,
+        "cash_in": 24933.66,
+        "cash_out": -8351.33,
+        "closing": -4845.9,
+        "events": [
+          {
+            "date": "2026-03-29",
+            "amount": 9860.42,
+            "description": "Receivable: Kesko (direct)",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1000,
+            "customer": "Kesko (direct)",
+            "confidence": "high"
+          },
+          {
+            "date": "2026-03-29",
+            "amount": 15073.24,
+            "description": "Receivable: Bars & Pubs FI",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1022,
+            "customer": "Bars & Pubs FI",
+            "confidence": "high"
+          },
+          {
+            "date": "2026-03-29",
+            "amount": -8351.33,
+            "description": "Payable: Cans & packaging",
+            "type": "payable",
+            "category": "purchase",
+            "invoice_id": 5004,
+            "supplier": "Cans & packaging",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-03-30",
+        "opening": -4845.9,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": -4845.9,
+        "events": []
+      },
+      {
+        "date": "2026-03-31",
+        "opening": -4845.9,
+        "cash_in": 0,
+        "cash_out": -15356,
+        "closing": -20201.9,
+        "events": [
+          {
+            "date": "2026-03-31",
+            "amount": -15356,
+            "description": "OP Bank Loan",
+            "type": "fixed_outflow",
+            "category": "debt"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-01",
+        "opening": -20201.9,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": -20201.9,
+        "events": []
+      },
+      {
+        "date": "2026-04-02",
+        "opening": -20201.9,
+        "cash_in": 8740.2,
+        "cash_out": 0,
+        "closing": -11461.7,
+        "events": [
+          {
+            "date": "2026-04-02",
+            "amount": 8740.2,
+            "description": "Receivable: Kesko (direct)",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1001,
+            "customer": "Kesko (direct)",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-03",
+        "opening": -11461.7,
+        "cash_in": 0,
+        "cash_out": -17808.77,
+        "closing": -29270.47,
+        "events": [
+          {
+            "date": "2026-04-03",
+            "amount": -11579.45,
+            "description": "Payable: Malt & grain",
+            "type": "payable",
+            "category": "purchase",
+            "invoice_id": 5001,
+            "supplier": "Malt & grain",
+            "confidence": "high"
+          },
+          {
+            "date": "2026-04-03",
+            "amount": -6229.32,
+            "description": "Payable: Hops",
+            "type": "payable",
+            "category": "purchase",
+            "invoice_id": 5002,
+            "supplier": "Hops",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-04",
+        "opening": -29270.47,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": -29270.47,
+        "events": []
+      },
+      {
+        "date": "2026-04-05",
+        "opening": -29270.47,
+        "cash_in": 0,
+        "cash_out": -14756,
+        "closing": -44026.47,
+        "events": [
+          {
+            "date": "2026-04-05",
+            "amount": -12350,
+            "description": "Rent – Kerava",
+            "type": "fixed_outflow",
+            "category": "rent"
+          },
+          {
+            "date": "2026-04-05",
+            "amount": -2406,
+            "description": "Rent – Espoo",
+            "type": "fixed_outflow",
+            "category": "rent"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-06",
+        "opening": -44026.47,
+        "cash_in": 0,
+        "cash_out": -5280.26,
+        "closing": -49306.73,
+        "events": [
+          {
+            "date": "2026-04-06",
+            "amount": -5280.26,
+            "description": "Payable: Other suppliers",
+            "type": "payable",
+            "category": "purchase",
+            "invoice_id": 5007,
+            "supplier": "Other suppliers",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-07",
+        "opening": -49306.73,
+        "cash_in": 5749.97,
+        "cash_out": 0,
+        "closing": -43556.76,
+        "events": [
+          {
+            "date": "2026-04-07",
+            "amount": 5749.97,
+            "description": "Receivable: Alko",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1006,
+            "customer": "Alko",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-08",
+        "opening": -43556.76,
+        "cash_in": 10033.08,
+        "cash_out": 0,
+        "closing": -33523.68,
+        "events": [
+          {
+            "date": "2026-04-08",
+            "amount": 10033.08,
+            "description": "Receivable: Export (Brill)",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1024,
+            "customer": "Export (Brill)",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-09",
+        "opening": -33523.68,
+        "cash_in": 10019.69,
+        "cash_out": 0,
+        "closing": -23503.99,
+        "events": [
+          {
+            "date": "2026-04-09",
+            "amount": 10019.69,
+            "description": "Receivable: SOK Central",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1003,
+            "customer": "SOK Central",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-10",
+        "opening": -23503.99,
+        "cash_in": 0,
+        "cash_out": -2200,
+        "closing": -25703.99,
+        "events": [
+          {
+            "date": "2026-04-10",
+            "amount": -2200,
+            "description": "Lease (cold/car)",
+            "type": "fixed_outflow",
+            "category": "lease"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-11",
+        "opening": -25703.99,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": -25703.99,
+        "events": []
+      },
+      {
+        "date": "2026-04-12",
+        "opening": -25703.99,
+        "cash_in": 0,
+        "cash_out": -10588.05,
+        "closing": -36292.04,
+        "events": [
+          {
+            "date": "2026-04-12",
+            "amount": -10588.05,
+            "description": "Payable: Malt & grain",
+            "type": "payable",
+            "category": "purchase",
+            "invoice_id": 5000,
+            "supplier": "Malt & grain",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-13",
+        "opening": -36292.04,
+        "cash_in": 8206.26,
+        "cash_out": 0,
+        "closing": -28085.78,
+        "events": [
+          {
+            "date": "2026-04-13",
+            "amount": 8206.26,
+            "description": "Receivable: Bars & Pubs FI",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1011,
+            "customer": "Bars & Pubs FI",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-14",
+        "opening": -28085.78,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": -28085.78,
+        "events": []
+      },
+      {
+        "date": "2026-04-15",
+        "opening": -28085.78,
+        "cash_in": 18532.08,
+        "cash_out": -25413,
+        "closing": -34966.7,
+        "events": [
+          {
+            "date": "2026-04-15",
+            "amount": -23713,
+            "description": "Salary (1st)",
+            "type": "fixed_outflow",
+            "category": "payroll"
+          },
+          {
+            "date": "2026-04-15",
+            "amount": -1700,
+            "description": "ICT",
+            "type": "fixed_outflow",
+            "category": "opex"
+          },
+          {
+            "date": "2026-04-15",
+            "amount": 9966.25,
+            "description": "Receivable: Kesko (direct)",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1002,
+            "customer": "Kesko (direct)",
+            "confidence": "high"
+          },
+          {
+            "date": "2026-04-15",
+            "amount": 8565.83,
+            "description": "Receivable: SOK Central",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1004,
+            "customer": "SOK Central",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-16",
+        "opening": -34966.7,
+        "cash_in": 13592.87,
+        "cash_out": 0,
+        "closing": -21373.83,
+        "events": [
+          {
+            "date": "2026-04-16",
+            "amount": 13592.87,
+            "description": "Receivable: Other Export",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1023,
+            "customer": "Other Export",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-17",
+        "opening": -21373.83,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": -21373.83,
+        "events": []
+      },
+      {
+        "date": "2026-04-18",
+        "opening": -21373.83,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": -21373.83,
+        "events": []
+      },
+      {
+        "date": "2026-04-19",
+        "opening": -21373.83,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": -21373.83,
+        "events": []
+      },
+      {
+        "date": "2026-04-20",
+        "opening": -21373.83,
+        "cash_in": 5347.09,
+        "cash_out": 0,
+        "closing": -16026.74,
+        "events": [
+          {
+            "date": "2026-04-20",
+            "amount": 5347.09,
+            "description": "Receivable: Systembolaget",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1016,
+            "customer": "Systembolaget",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-21",
+        "opening": -16026.74,
+        "cash_in": 4847.18,
+        "cash_out": 0,
+        "closing": -11179.56,
+        "events": [
+          {
+            "date": "2026-04-21",
+            "amount": 4847.18,
+            "description": "Receivable: SOK Bars",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1005,
+            "customer": "SOK Bars",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-22",
+        "opening": -11179.56,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": -11179.56,
+        "events": []
+      },
+      {
+        "date": "2026-04-23",
+        "opening": -11179.56,
+        "cash_in": 7677.52,
+        "cash_out": 0,
+        "closing": -3502.04,
+        "events": [
+          {
+            "date": "2026-04-23",
+            "amount": 7677.52,
+            "description": "Revenue forecast: Kesko (direct)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-24",
+        "opening": -3502.04,
+        "cash_in": 21985.11,
+        "cash_out": -32468.8,
+        "closing": -13985.73,
+        "events": [
+          {
+            "date": "2026-04-24",
+            "amount": 10209.76,
+            "description": "Receivable: Bars & Pubs FI",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1013,
+            "customer": "Bars & Pubs FI",
+            "confidence": "medium"
+          },
+          {
+            "date": "2026-04-24",
+            "amount": 4663.04,
+            "description": "Revenue forecast: Export (Brill)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-04-24",
+            "amount": 7112.31,
+            "description": "Revenue forecast: Other Export",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-04-24",
+            "amount": -32468.8,
+            "description": "Operating costs (LivePlan forecast)",
+            "type": "liveplan_costs",
+            "category": "costs",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-25",
+        "opening": -13985.73,
+        "cash_in": 2543.47,
+        "cash_out": 0,
+        "closing": -11442.26,
+        "events": [
+          {
+            "date": "2026-04-25",
+            "amount": 2543.47,
+            "description": "Revenue forecast: Salama Own Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-26",
+        "opening": -11442.26,
+        "cash_in": 9514.47,
+        "cash_out": 0,
+        "closing": -1927.79,
+        "events": [
+          {
+            "date": "2026-04-26",
+            "amount": 5275.35,
+            "description": "Revenue forecast: SOK Central",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-04-26",
+            "amount": 4239.12,
+            "description": "Revenue forecast: Espoo Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-27",
+        "opening": -1927.79,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": -1927.79,
+        "events": []
+      },
+      {
+        "date": "2026-04-28",
+        "opening": -1927.79,
+        "cash_in": 15590.55,
+        "cash_out": -23712,
+        "closing": -10049.24,
+        "events": [
+          {
+            "date": "2026-04-28",
+            "amount": -23712,
+            "description": "Salary (2nd)",
+            "type": "fixed_outflow",
+            "category": "payroll"
+          },
+          {
+            "date": "2026-04-28",
+            "amount": 1271.74,
+            "description": "Revenue forecast: SOK Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-04-28",
+            "amount": 1460.14,
+            "description": "Revenue forecast: Alko",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-04-28",
+            "amount": 3862.31,
+            "description": "Revenue forecast: Online Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-04-28",
+            "amount": 7583.32,
+            "description": "Revenue forecast: Bars & Pubs FI",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-04-28",
+            "amount": 1413.04,
+            "description": "Revenue forecast: Systembolaget",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-29",
+        "opening": -10049.24,
+        "cash_in": 19621.59,
+        "cash_out": 0,
+        "closing": 9572.35,
+        "events": [
+          {
+            "date": "2026-04-29",
+            "amount": 10322.97,
+            "description": "Receivable: Bars & Pubs FI",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1012,
+            "customer": "Bars & Pubs FI",
+            "confidence": "medium"
+          },
+          {
+            "date": "2026-04-29",
+            "amount": 9298.62,
+            "description": "Receivable: Other Export",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1021,
+            "customer": "Other Export",
+            "confidence": "medium"
+          }
+        ]
+      },
+      {
+        "date": "2026-04-30",
+        "opening": 9572.35,
+        "cash_in": 7677.52,
+        "cash_out": -15356,
+        "closing": 1893.87,
+        "events": [
+          {
+            "date": "2026-04-30",
+            "amount": -15356,
+            "description": "OP Bank Loan",
+            "type": "fixed_outflow",
+            "category": "debt"
+          },
+          {
+            "date": "2026-04-30",
+            "amount": 7677.52,
+            "description": "Revenue forecast: Kesko (direct)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-01",
+        "opening": 1893.87,
+        "cash_in": 11775.35,
+        "cash_out": -32468.8,
+        "closing": -18799.58,
+        "events": [
+          {
+            "date": "2026-05-01",
+            "amount": 4663.04,
+            "description": "Revenue forecast: Export (Brill)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-01",
+            "amount": 7112.31,
+            "description": "Revenue forecast: Other Export",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-01",
+            "amount": -32468.8,
+            "description": "Operating costs (LivePlan forecast)",
+            "type": "liveplan_costs",
+            "category": "costs",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-02",
+        "opening": -18799.58,
+        "cash_in": 12389.92,
+        "cash_out": 0,
+        "closing": -6409.66,
+        "events": [
+          {
+            "date": "2026-05-02",
+            "amount": 9846.45,
+            "description": "Receivable: Export (Brill)",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1014,
+            "customer": "Export (Brill)",
+            "confidence": "medium"
+          },
+          {
+            "date": "2026-05-02",
+            "amount": 2543.47,
+            "description": "Revenue forecast: Salama Own Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-03",
+        "opening": -6409.66,
+        "cash_in": 17940.77,
+        "cash_out": 0,
+        "closing": 11531.11,
+        "events": [
+          {
+            "date": "2026-05-03",
+            "amount": 8426.3,
+            "description": "Receivable: Other Export",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1020,
+            "customer": "Other Export",
+            "confidence": "medium"
+          },
+          {
+            "date": "2026-05-03",
+            "amount": 5275.35,
+            "description": "Revenue forecast: SOK Central",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-03",
+            "amount": 4239.12,
+            "description": "Revenue forecast: Espoo Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-04",
+        "opening": 11531.11,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": 11531.11,
+        "events": []
+      },
+      {
+        "date": "2026-05-05",
+        "opening": 11531.11,
+        "cash_in": 15590.55,
+        "cash_out": -14756,
+        "closing": 12365.66,
+        "events": [
+          {
+            "date": "2026-05-05",
+            "amount": -12350,
+            "description": "Rent – Kerava",
+            "type": "fixed_outflow",
+            "category": "rent"
+          },
+          {
+            "date": "2026-05-05",
+            "amount": -2406,
+            "description": "Rent – Espoo",
+            "type": "fixed_outflow",
+            "category": "rent"
+          },
+          {
+            "date": "2026-05-05",
+            "amount": 1271.74,
+            "description": "Revenue forecast: SOK Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-05",
+            "amount": 1460.14,
+            "description": "Revenue forecast: Alko",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-05",
+            "amount": 3862.31,
+            "description": "Revenue forecast: Online Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-05",
+            "amount": 7583.32,
+            "description": "Revenue forecast: Bars & Pubs FI",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-05",
+            "amount": 1413.04,
+            "description": "Revenue forecast: Systembolaget",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-06",
+        "opening": 12365.66,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": 12365.66,
+        "events": []
+      },
+      {
+        "date": "2026-05-07",
+        "opening": 12365.66,
+        "cash_in": 7536.53,
+        "cash_out": 0,
+        "closing": 19902.19,
+        "events": [
+          {
+            "date": "2026-05-07",
+            "amount": 7536.53,
+            "description": "Revenue forecast: Kesko (direct)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-08",
+        "opening": 19902.19,
+        "cash_in": 19742.85,
+        "cash_out": -31617.19,
+        "closing": 8027.85,
+        "events": [
+          {
+            "date": "2026-05-08",
+            "amount": 8183.76,
+            "description": "Receivable: Other Export",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1019,
+            "customer": "Other Export",
+            "confidence": "medium"
+          },
+          {
+            "date": "2026-05-08",
+            "amount": 4577.4,
+            "description": "Revenue forecast: Export (Brill)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-08",
+            "amount": 6981.69,
+            "description": "Revenue forecast: Other Export",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-08",
+            "amount": -31617.19,
+            "description": "Operating costs (LivePlan forecast)",
+            "type": "liveplan_costs",
+            "category": "costs",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-09",
+        "opening": 8027.85,
+        "cash_in": 11253.98,
+        "cash_out": 0,
+        "closing": 19281.83,
+        "events": [
+          {
+            "date": "2026-05-09",
+            "amount": 8757.22,
+            "description": "Receivable: Export (Brill)",
+            "type": "receivable",
+            "category": "revenue",
+            "invoice_id": 1015,
+            "customer": "Export (Brill)",
+            "confidence": "medium"
+          },
+          {
+            "date": "2026-05-09",
+            "amount": 2496.76,
+            "description": "Revenue forecast: Salama Own Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-10",
+        "opening": 19281.83,
+        "cash_in": 9339.74,
+        "cash_out": -2200,
+        "closing": 26421.57,
+        "events": [
+          {
+            "date": "2026-05-10",
+            "amount": -2200,
+            "description": "Lease (cold/car)",
+            "type": "fixed_outflow",
+            "category": "lease"
+          },
+          {
+            "date": "2026-05-10",
+            "amount": 5178.47,
+            "description": "Revenue forecast: SOK Central",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-10",
+            "amount": 4161.27,
+            "description": "Revenue forecast: Espoo Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-11",
+        "opening": 26421.57,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": 26421.57,
+        "events": []
+      },
+      {
+        "date": "2026-05-12",
+        "opening": 26421.57,
+        "cash_in": 15304.23,
+        "cash_out": 0,
+        "closing": 41725.8,
+        "events": [
+          {
+            "date": "2026-05-12",
+            "amount": 1248.38,
+            "description": "Revenue forecast: SOK Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-12",
+            "amount": 1433.33,
+            "description": "Revenue forecast: Alko",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-12",
+            "amount": 3791.38,
+            "description": "Revenue forecast: Online Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-12",
+            "amount": 7444.05,
+            "description": "Revenue forecast: Bars & Pubs FI",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-12",
+            "amount": 1387.09,
+            "description": "Revenue forecast: Systembolaget",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-13",
+        "opening": 41725.8,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": 41725.8,
+        "events": []
+      },
+      {
+        "date": "2026-05-14",
+        "opening": 41725.8,
+        "cash_in": 7536.53,
+        "cash_out": 0,
+        "closing": 49262.33,
+        "events": [
+          {
+            "date": "2026-05-14",
+            "amount": 7536.53,
+            "description": "Revenue forecast: Kesko (direct)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-15",
+        "opening": 49262.33,
+        "cash_in": 11559.09,
+        "cash_out": -57030.19,
+        "closing": 3791.23,
+        "events": [
+          {
+            "date": "2026-05-15",
+            "amount": -23713,
+            "description": "Salary (1st)",
+            "type": "fixed_outflow",
+            "category": "payroll"
+          },
+          {
+            "date": "2026-05-15",
+            "amount": -1700,
+            "description": "ICT",
+            "type": "fixed_outflow",
+            "category": "opex"
+          },
+          {
+            "date": "2026-05-15",
+            "amount": 4577.4,
+            "description": "Revenue forecast: Export (Brill)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-15",
+            "amount": 6981.69,
+            "description": "Revenue forecast: Other Export",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-15",
+            "amount": -31617.19,
+            "description": "Operating costs (LivePlan forecast)",
+            "type": "liveplan_costs",
+            "category": "costs",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-16",
+        "opening": 3791.23,
+        "cash_in": 2496.76,
+        "cash_out": 0,
+        "closing": 6287.99,
+        "events": [
+          {
+            "date": "2026-05-16",
+            "amount": 2496.76,
+            "description": "Revenue forecast: Salama Own Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-17",
+        "opening": 6287.99,
+        "cash_in": 9339.74,
+        "cash_out": 0,
+        "closing": 15627.73,
+        "events": [
+          {
+            "date": "2026-05-17",
+            "amount": 5178.47,
+            "description": "Revenue forecast: SOK Central",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-17",
+            "amount": 4161.27,
+            "description": "Revenue forecast: Espoo Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-18",
+        "opening": 15627.73,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": 15627.73,
+        "events": []
+      },
+      {
+        "date": "2026-05-19",
+        "opening": 15627.73,
+        "cash_in": 15304.23,
+        "cash_out": 0,
+        "closing": 30931.96,
+        "events": [
+          {
+            "date": "2026-05-19",
+            "amount": 1248.38,
+            "description": "Revenue forecast: SOK Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-19",
+            "amount": 1433.33,
+            "description": "Revenue forecast: Alko",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-19",
+            "amount": 3791.38,
+            "description": "Revenue forecast: Online Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-19",
+            "amount": 7444.05,
+            "description": "Revenue forecast: Bars & Pubs FI",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-19",
+            "amount": 1387.09,
+            "description": "Revenue forecast: Systembolaget",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-20",
+        "opening": 30931.96,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": 30931.96,
+        "events": []
+      },
+      {
+        "date": "2026-05-21",
+        "opening": 30931.96,
+        "cash_in": 7536.53,
+        "cash_out": 0,
+        "closing": 38468.49,
+        "events": [
+          {
+            "date": "2026-05-21",
+            "amount": 7536.53,
+            "description": "Revenue forecast: Kesko (direct)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-22",
+        "opening": 38468.49,
+        "cash_in": 11559.09,
+        "cash_out": -31617.19,
+        "closing": 18410.39,
+        "events": [
+          {
+            "date": "2026-05-22",
+            "amount": 4577.4,
+            "description": "Revenue forecast: Export (Brill)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-22",
+            "amount": 6981.69,
+            "description": "Revenue forecast: Other Export",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-22",
+            "amount": -31617.19,
+            "description": "Operating costs (LivePlan forecast)",
+            "type": "liveplan_costs",
+            "category": "costs",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-23",
+        "opening": 18410.39,
+        "cash_in": 2496.76,
+        "cash_out": 0,
+        "closing": 20907.15,
+        "events": [
+          {
+            "date": "2026-05-23",
+            "amount": 2496.76,
+            "description": "Revenue forecast: Salama Own Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-24",
+        "opening": 20907.15,
+        "cash_in": 9339.74,
+        "cash_out": 0,
+        "closing": 30246.89,
+        "events": [
+          {
+            "date": "2026-05-24",
+            "amount": 5178.47,
+            "description": "Revenue forecast: SOK Central",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-24",
+            "amount": 4161.27,
+            "description": "Revenue forecast: Espoo Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-25",
+        "opening": 30246.89,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": 30246.89,
+        "events": []
+      },
+      {
+        "date": "2026-05-26",
+        "opening": 30246.89,
+        "cash_in": 15304.23,
+        "cash_out": 0,
+        "closing": 45551.12,
+        "events": [
+          {
+            "date": "2026-05-26",
+            "amount": 1248.38,
+            "description": "Revenue forecast: SOK Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-26",
+            "amount": 1433.33,
+            "description": "Revenue forecast: Alko",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-26",
+            "amount": 3791.38,
+            "description": "Revenue forecast: Online Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-26",
+            "amount": 7444.05,
+            "description": "Revenue forecast: Bars & Pubs FI",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-26",
+            "amount": 1387.09,
+            "description": "Revenue forecast: Systembolaget",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-27",
+        "opening": 45551.12,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": 45551.12,
+        "events": []
+      },
+      {
+        "date": "2026-05-28",
+        "opening": 45551.12,
+        "cash_in": 7536.53,
+        "cash_out": -23712,
+        "closing": 29375.65,
+        "events": [
+          {
+            "date": "2026-05-28",
+            "amount": -23712,
+            "description": "Salary (2nd)",
+            "type": "fixed_outflow",
+            "category": "payroll"
+          },
+          {
+            "date": "2026-05-28",
+            "amount": 7536.53,
+            "description": "Revenue forecast: Kesko (direct)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-29",
+        "opening": 29375.65,
+        "cash_in": 11559.09,
+        "cash_out": -31617.19,
+        "closing": 9317.55,
+        "events": [
+          {
+            "date": "2026-05-29",
+            "amount": 4577.4,
+            "description": "Revenue forecast: Export (Brill)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-29",
+            "amount": 6981.69,
+            "description": "Revenue forecast: Other Export",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-29",
+            "amount": -31617.19,
+            "description": "Operating costs (LivePlan forecast)",
+            "type": "liveplan_costs",
+            "category": "costs",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-30",
+        "opening": 9317.55,
+        "cash_in": 2496.76,
+        "cash_out": 0,
+        "closing": 11814.31,
+        "events": [
+          {
+            "date": "2026-05-30",
+            "amount": 2496.76,
+            "description": "Revenue forecast: Salama Own Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-05-31",
+        "opening": 11814.31,
+        "cash_in": 9339.74,
+        "cash_out": -15356,
+        "closing": 5798.05,
+        "events": [
+          {
+            "date": "2026-05-31",
+            "amount": -15356,
+            "description": "OP Bank Loan",
+            "type": "fixed_outflow",
+            "category": "debt"
+          },
+          {
+            "date": "2026-05-31",
+            "amount": 5178.47,
+            "description": "Revenue forecast: SOK Central",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-05-31",
+            "amount": 4161.27,
+            "description": "Revenue forecast: Espoo Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-01",
+        "opening": 5798.05,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": 5798.05,
+        "events": []
+      },
+      {
+        "date": "2026-06-02",
+        "opening": 5798.05,
+        "cash_in": 15304.23,
+        "cash_out": 0,
+        "closing": 21102.28,
+        "events": [
+          {
+            "date": "2026-06-02",
+            "amount": 1248.38,
+            "description": "Revenue forecast: SOK Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-02",
+            "amount": 1433.33,
+            "description": "Revenue forecast: Alko",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-02",
+            "amount": 3791.38,
+            "description": "Revenue forecast: Online Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-02",
+            "amount": 7444.05,
+            "description": "Revenue forecast: Bars & Pubs FI",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-02",
+            "amount": 1387.09,
+            "description": "Revenue forecast: Systembolaget",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-03",
+        "opening": 21102.28,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": 21102.28,
+        "events": []
+      },
+      {
+        "date": "2026-06-04",
+        "opening": 21102.28,
+        "cash_in": 7977.49,
+        "cash_out": 0,
+        "closing": 29079.77,
+        "events": [
+          {
+            "date": "2026-06-04",
+            "amount": 7977.49,
+            "description": "Revenue forecast: Kesko (direct)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-05",
+        "opening": 29079.77,
+        "cash_in": 12235.42,
+        "cash_out": -48295.8,
+        "closing": -6980.61,
+        "events": [
+          {
+            "date": "2026-06-05",
+            "amount": -12350,
+            "description": "Rent – Kerava",
+            "type": "fixed_outflow",
+            "category": "rent"
+          },
+          {
+            "date": "2026-06-05",
+            "amount": -2406,
+            "description": "Rent – Espoo",
+            "type": "fixed_outflow",
+            "category": "rent"
+          },
+          {
+            "date": "2026-06-05",
+            "amount": 4845.23,
+            "description": "Revenue forecast: Export (Brill)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-05",
+            "amount": 7390.19,
+            "description": "Revenue forecast: Other Export",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-05",
+            "amount": -33539.8,
+            "description": "Operating costs (LivePlan forecast)",
+            "type": "liveplan_costs",
+            "category": "costs",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-06",
+        "opening": -6980.61,
+        "cash_in": 2642.85,
+        "cash_out": 0,
+        "closing": -4337.76,
+        "events": [
+          {
+            "date": "2026-06-06",
+            "amount": 2642.85,
+            "description": "Revenue forecast: Salama Own Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-07",
+        "opening": -4337.76,
+        "cash_in": 9886.22,
+        "cash_out": 0,
+        "closing": 5548.46,
+        "events": [
+          {
+            "date": "2026-06-07",
+            "amount": 5481.47,
+            "description": "Revenue forecast: SOK Central",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-07",
+            "amount": 4404.75,
+            "description": "Revenue forecast: Espoo Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-08",
+        "opening": 5548.46,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": 5548.46,
+        "events": []
+      },
+      {
+        "date": "2026-06-09",
+        "opening": 5548.46,
+        "cash_in": 16199.69,
+        "cash_out": 0,
+        "closing": 21748.15,
+        "events": [
+          {
+            "date": "2026-06-09",
+            "amount": 1321.42,
+            "description": "Revenue forecast: SOK Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-09",
+            "amount": 1517.19,
+            "description": "Revenue forecast: Alko",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-09",
+            "amount": 4013.22,
+            "description": "Revenue forecast: Online Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-09",
+            "amount": 7879.61,
+            "description": "Revenue forecast: Bars & Pubs FI",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-09",
+            "amount": 1468.25,
+            "description": "Revenue forecast: Systembolaget",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-10",
+        "opening": 21748.15,
+        "cash_in": 0,
+        "cash_out": -2200,
+        "closing": 19548.15,
+        "events": [
+          {
+            "date": "2026-06-10",
+            "amount": -2200,
+            "description": "Lease (cold/car)",
+            "type": "fixed_outflow",
+            "category": "lease"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-11",
+        "opening": 19548.15,
+        "cash_in": 7977.49,
+        "cash_out": 0,
+        "closing": 27525.64,
+        "events": [
+          {
+            "date": "2026-06-11",
+            "amount": 7977.49,
+            "description": "Revenue forecast: Kesko (direct)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-12",
+        "opening": 27525.64,
+        "cash_in": 12235.42,
+        "cash_out": -33539.8,
+        "closing": 6221.26,
+        "events": [
+          {
+            "date": "2026-06-12",
+            "amount": 4845.23,
+            "description": "Revenue forecast: Export (Brill)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-12",
+            "amount": 7390.19,
+            "description": "Revenue forecast: Other Export",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-12",
+            "amount": -33539.8,
+            "description": "Operating costs (LivePlan forecast)",
+            "type": "liveplan_costs",
+            "category": "costs",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-13",
+        "opening": 6221.26,
+        "cash_in": 2642.85,
+        "cash_out": 0,
+        "closing": 8864.11,
+        "events": [
+          {
+            "date": "2026-06-13",
+            "amount": 2642.85,
+            "description": "Revenue forecast: Salama Own Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-14",
+        "opening": 8864.11,
+        "cash_in": 9886.22,
+        "cash_out": 0,
+        "closing": 18750.33,
+        "events": [
+          {
+            "date": "2026-06-14",
+            "amount": 5481.47,
+            "description": "Revenue forecast: SOK Central",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-14",
+            "amount": 4404.75,
+            "description": "Revenue forecast: Espoo Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-15",
+        "opening": 18750.33,
+        "cash_in": 0,
+        "cash_out": -25413,
+        "closing": -6662.67,
+        "events": [
+          {
+            "date": "2026-06-15",
+            "amount": -23713,
+            "description": "Salary (1st)",
+            "type": "fixed_outflow",
+            "category": "payroll"
+          },
+          {
+            "date": "2026-06-15",
+            "amount": -1700,
+            "description": "ICT",
+            "type": "fixed_outflow",
+            "category": "opex"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-16",
+        "opening": -6662.67,
+        "cash_in": 16199.69,
+        "cash_out": 0,
+        "closing": 9537.02,
+        "events": [
+          {
+            "date": "2026-06-16",
+            "amount": 1321.42,
+            "description": "Revenue forecast: SOK Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-16",
+            "amount": 1517.19,
+            "description": "Revenue forecast: Alko",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-16",
+            "amount": 4013.22,
+            "description": "Revenue forecast: Online Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-16",
+            "amount": 7879.61,
+            "description": "Revenue forecast: Bars & Pubs FI",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-16",
+            "amount": 1468.25,
+            "description": "Revenue forecast: Systembolaget",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-17",
+        "opening": 9537.02,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": 9537.02,
+        "events": []
+      },
+      {
+        "date": "2026-06-18",
+        "opening": 9537.02,
+        "cash_in": 7977.49,
+        "cash_out": 0,
+        "closing": 17514.51,
+        "events": [
+          {
+            "date": "2026-06-18",
+            "amount": 7977.49,
+            "description": "Revenue forecast: Kesko (direct)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-19",
+        "opening": 17514.51,
+        "cash_in": 12235.42,
+        "cash_out": -33539.8,
+        "closing": -3789.87,
+        "events": [
+          {
+            "date": "2026-06-19",
+            "amount": 4845.23,
+            "description": "Revenue forecast: Export (Brill)",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-19",
+            "amount": 7390.19,
+            "description": "Revenue forecast: Other Export",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-19",
+            "amount": -33539.8,
+            "description": "Operating costs (LivePlan forecast)",
+            "type": "liveplan_costs",
+            "category": "costs",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-20",
+        "opening": -3789.87,
+        "cash_in": 2642.85,
+        "cash_out": 0,
+        "closing": -1147.02,
+        "events": [
+          {
+            "date": "2026-06-20",
+            "amount": 2642.85,
+            "description": "Revenue forecast: Salama Own Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-21",
+        "opening": -1147.02,
+        "cash_in": 9886.22,
+        "cash_out": 0,
+        "closing": 8739.2,
+        "events": [
+          {
+            "date": "2026-06-21",
+            "amount": 5481.47,
+            "description": "Revenue forecast: SOK Central",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-21",
+            "amount": 4404.75,
+            "description": "Revenue forecast: Espoo Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      },
+      {
+        "date": "2026-06-22",
+        "opening": 8739.2,
+        "cash_in": 0,
+        "cash_out": 0,
+        "closing": 8739.2,
+        "events": []
+      },
+      {
+        "date": "2026-06-23",
+        "opening": 8739.2,
+        "cash_in": 16199.69,
+        "cash_out": 0,
+        "closing": 24938.89,
+        "events": [
+          {
+            "date": "2026-06-23",
+            "amount": 1321.42,
+            "description": "Revenue forecast: SOK Bars",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-23",
+            "amount": 1517.19,
+            "description": "Revenue forecast: Alko",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-23",
+            "amount": 4013.22,
+            "description": "Revenue forecast: Online Shop",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-23",
+            "amount": 7879.61,
+            "description": "Revenue forecast: Bars & Pubs FI",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          },
+          {
+            "date": "2026-06-23",
+            "amount": 1468.25,
+            "description": "Revenue forecast: Systembolaget",
+            "type": "liveplan_revenue",
+            "category": "revenue",
+            "confidence": "low"
+          }
+        ]
+      }
+    ]
+  },
+  "liveplan": {
+    "1": {
+      "revenue": 116575,
+      "direct_costs": 49424,
+      "expenses": 49773
+    },
+    "2": {
+      "revenue": 167111,
+      "direct_costs": 71516,
+      "expenses": 48273
+    },
+    "3": {
+      "revenue": 174194,
+      "direct_costs": 73158,
+      "expenses": 53302
+    },
+    "4": {
+      "revenue": 201863,
+      "direct_costs": 84585,
+      "expenses": 54567
+    },
+    "5": {
+      "revenue": 204761,
+      "direct_costs": 85188,
+      "expenses": 54831
+    },
+    "6": {
+      "revenue": 209750,
+      "direct_costs": 85911,
+      "expenses": 57831
+    },
+    "7": {
+      "revenue": 229261,
+      "direct_costs": 97265,
+      "expenses": 61831
+    },
+    "8": {
+      "revenue": 281684,
+      "direct_costs": 115769,
+      "expenses": 62331
+    },
+    "9": {
+      "revenue": 234374,
+      "direct_costs": 96969,
+      "expenses": 62861
+    },
+    "10": {
+      "revenue": 188881,
+      "direct_costs": 77412,
+      "expenses": 58861
+    },
+    "11": {
+      "revenue": 209865,
+      "direct_costs": 85794,
+      "expenses": 59125
+    },
+    "12": {
+      "revenue": 154095,
+      "direct_costs": 61371,
+      "expenses": 59125
+    }
+  }
+}
