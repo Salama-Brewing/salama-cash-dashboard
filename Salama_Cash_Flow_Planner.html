@@ -702,7 +702,7 @@ function render(){
     <div class="hs"><div class="lbl">Next Fixed Payment</div><div class="val">${nextFixed?`${eur(nextFixed.amt)} in ${nextFixed.days}d`:"—"}</div></div>
   </div>
   <div class="tabs">
-    <button class="tab ${S.tab==="today"?"active":""}" onclick="setTab('today')">Today</button>
+    <button class="tab ${S.tab==="today"?"active":""}" onclick="setTab('today')">📋 Today</button>
     <button class="tab ${S.tab==="forecast"?"active":""}" onclick="setTab('forecast')">13-Week Forecast</button>
     <button class="tab ${S.tab==="customers"?"active":""}" onclick="setTab('customers')">Customers & Suppliers</button>
     <button class="tab ${S.tab==="budget"?"active":""}" onclick="setTab('budget')">Budget Breakdown</button>
@@ -764,42 +764,111 @@ function render(){
 // TAB: TODAY
 // ════════════════════════════════════════════════════════════
 function buildTodayTab(days7,insights,tonightBal,lowestThisWeek,lowestDay,gf,cd){
-  var urgent=insights.actions.filter(a=>a.level==="urgent");
-  var warns=insights.actions.filter(a=>a.level==="warning");
-  var infos=insights.actions.filter(a=>a.level==="info"||a.level==="ok");
+  var b=window.__briefings;
+  var dismissed=getDismissed();
+  var h="";
 
-  var alertCls=urgent.length>0?"al-red":warns.length>0?"al-amb":"al-grn";
-  var alertTxt=urgent.length>0
-    ?`🚨 ${urgent.length} invoice${urgent.length>1?"s":""} outside normal payment pattern — action required today`
-    :warns.length>0?`⚡ ${warns.length} follow-up${warns.length>1?"s":""} needed — invoices at or past normal payment window`
-    :`✓ All AR within normal payment patterns. Focus: monitor ${lowestDay?lowestDay.label+" ("+eur(lowestThisWeek)+")":"this week"}.`;
+  // ── Briefing section (top — single source of truth for actions) ──────────
+  var roles=[
+    {id:"ceo",label:"CEO / CFO"},{id:"sales",label:"Sales"},
+    {id:"production",label:"Production"},{id:"marketing",label:"Marketing"}
+  ];
+  var roleTabs=roles.map(r=>`<button class="role-btn ${S.briefingRole===r.id?"active":""}" onclick="setBriefingRole('${r.id}')">${r.label}</button>`).join("");
 
-  var h=`<div class="alert ${alertCls}">${alertTxt}</div>
-<div class="g4">
+  if(b&&b.roles){
+    var runType=b.run_type==="morning"?"Morning":"Evening";
+    var genDate=b.generated_at?new Date(b.generated_at):new Date();
+    var timeStr=genDate.toLocaleTimeString("fi-FI",{hour:"2-digit",minute:"2-digit"});
+    var rd=(b.roles||{})[S.briefingRole]||b.roles.ceo;
+    var status=rd.status||"amber";
+
+    // Unclosed (cross-role)
+    var unclosedAll=(b.unclosed||[]).filter(a=>!dismissed.includes(a.id));
+    var unclosedBox="";
+    if(unclosedAll.length>0){
+      unclosedBox=`<div class="unclosed-box">
+        <div class="unclosed-title">⚠️ Not followed up from previous briefing</div>
+        ${unclosedAll.map(a=>`<div class="unclosed-item">
+          <span style="flex:1">${a.text}</span>
+          <span class="unclosed-days">${a.days_open}d open</span>
+          <button class="unclosed-dismiss" onclick="dismissAction('${a.id}')">✓ Done</button>
+        </div>`).join("")}
+      </div>`;
+    }
+
+    // CEO financial KPIs
+    var kpiRow="";
+    if(S.briefingRole==="ceo"&&(rd.cash_position||rd.ar_summary||rd.runway)){
+      kpiRow=`<div class="brief-kpi-row">${[
+        rd.cash_position?{l:"Cash Position",v:rd.cash_position}:null,
+        rd.ar_summary?{l:"AR Overview",v:rd.ar_summary}:null,
+        rd.runway?{l:"Runway",v:rd.runway}:null
+      ].filter(Boolean).map(k=>`<div class="brief-kpi"><div class="brief-kpi-lbl">${k.l}</div><div class="brief-kpi-val" style="font-size:11px;font-weight:600;color:#374151">${k.v}</div></div>`).join("")}</div>`;
+    }
+
+    var actionsHtml=(rd.actions||[]).filter(a=>!dismissed.includes(a.id)).map((a,i)=>`
+      <div class="brief-action ${a.urgent?"urgent":""}">
+        <div class="brief-action-num ${a.urgent?"urgent":""}">${i+1}</div>
+        <div class="brief-action-text">${a.text}</div>
+        ${a.urgent?`<span class="badge b-red" style="flex-shrink:0">Urgent</span>`:""}
+        <button class="unclosed-dismiss" onclick="dismissAction('${a.id}')" title="Mark done">✓</button>
+      </div>`).join("")||`<p style="font-size:12px;color:#6B7280;padding:8px 0">No actions — all clear</p>`;
+
+    h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+      <div>
+        <div class="stitle" style="margin:0">📋 ${runType} Briefing</div>
+        <div class="brief-meta">Generated ${timeStr} · AI-powered · ${b.unclosed_count>0?`<span style="color:#D97706;font-weight:600">${b.unclosed_count} not followed up</span>`:"All previous actions closed"}</div>
+      </div>
+      <div class="role-tabs" style="margin:0">${roleTabs}</div>
+    </div>
+    ${unclosedBox}
+    <div class="brief-status ${status}">
+      <div class="brief-dot ${status}"></div>
+      <div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;opacity:.7;margin-bottom:2px">${status==="red"?"🔴 URGENT":status==="amber"?"🟠 NEEDS ATTENTION":"🟢 ON TRACK"}</div>
+        <div class="brief-headline ${status}">${rd.headline||""}</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:10px">
+      ${kpiRow}
+      ${rd.narrative?`<div class="brief-narrative" style="margin-bottom:8px">${rd.narrative}</div>`:""}
+      ${rd.focus?`<div class="brief-focus" style="margin-bottom:10px">${rd.focus}</div>`:""}
+      <div class="brief-section-title">Actions</div>
+      ${actionsHtml}
+      <div style="text-align:right;margin-top:8px"><button class="role-btn" onclick="setTab('briefings')" style="font-size:11px;padding:4px 12px">All roles — full briefing →</button></div>
+    </div>`;
+
+  } else {
+    // No briefing loaded — show computed fallback
+    var urgent=insights.actions.filter(a=>a.level==="urgent");
+    var warns=insights.actions.filter(a=>a.level==="warning");
+    var infos=insights.actions.filter(a=>a.level==="info"||a.level==="ok");
+    var alertCls=urgent.length>0?"al-red":warns.length>0?"al-amb":"al-grn";
+    var alertTxt=urgent.length>0
+      ?`🚨 ${urgent.length} invoice${urgent.length>1?"s":""} outside normal payment pattern — action required today`
+      :warns.length>0?`⚡ ${warns.length} follow-up${warns.length>1?"s":""} needed`
+      :`✓ All AR within normal patterns.`;
+    h+=`<div class="alert ${alertCls}">${alertTxt}</div>`;
+    h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px"><div class="stitle" style="margin:0">Actions Required Today</div><div class="role-tabs" style="margin:0">${roleTabs}</div></div>`;
+    h+=`<div class="card" style="margin-bottom:10px">`;
+    if(insights.actions.length===0){
+      h+=`<div class="action-item ai-ok"><div class="ai-icon">✓</div><div class="ai-body"><div class="ai-title">No actions needed</div><div class="ai-desc">All invoices within expected payment patterns.</div></div></div>`;
+    } else {
+      [...urgent,...warns,...infos].forEach(a=>{
+        var cls=a.level==="urgent"?"ai-urg":a.level==="warning"?"ai-warn":a.level==="info"?"ai-info":"ai-ok";
+        h+=`<div class="action-item ${cls}"><div class="ai-icon">${a.icon}</div><div class="ai-body"><div class="ai-title">${a.title}</div><div class="ai-desc">${a.desc}</div></div>${a.amount?`<div style="font-weight:700;font-size:12px;flex-shrink:0">${eur(a.amount)}</div>`:""}</div>`;
+      });
+    }
+    h+=`<p class="note" style="margin-top:8px">AI briefings generate at 06:00 & 17:00 via GitHub Actions. Run <code>node analyze.js</code> to generate now.</p></div>`;
+  }
+
+  // ── Cash KPIs ─────────────────────────────────────────────────────────────
+  h+=`<div class="g4">
   <div class="card"><div class="kpi-lbl">Tonight's Balance</div><div class="kpi-val ${clr(tonightBal)}">${eur(tonightBal)}</div><div class="kpi-sub">End of Mar 25</div></div>
   <div class="card"><div class="kpi-lbl">Week's Low Point</div><div class="kpi-val txt-red">${eur(lowestThisWeek)}</div><div class="kpi-sub">${lowestDay?lowestDay.label:""}</div></div>
   <div class="card"><div class="kpi-lbl">Expected In This Week</div><div class="kpi-val txt-grn">${eur(insights.thisWeekTotal)}</div><div class="kpi-sub">${insights.thisWeekIn.length} invoices</div></div>
   <div class="card"><div class="kpi-lbl">Fixed Out This Week</div><div class="kpi-val txt-red">${eur(insights.thisWeekOut)}</div><div class="kpi-sub">Salary, rent, loan</div></div>
 </div>`;
-
-  // Action items
-  h+=`<div class="card"><div class="stitle">Actions Required Today</div>`;
-  if(insights.actions.length===0){
-    h+=`<div class="action-item ai-ok"><div class="ai-icon">✓</div><div class="ai-body"><div class="ai-title">No actions needed</div><div class="ai-desc">All invoices within expected payment patterns.</div></div></div>`;
-  } else {
-    [...urgent,...warns,...infos].forEach(a=>{
-      var cls=a.level==="urgent"?"ai-urg":a.level==="warning"?"ai-warn":a.level==="info"?"ai-info":"ai-ok";
-      h+=`<div class="action-item ${cls}"><div class="ai-icon">${a.icon}</div><div class="ai-body"><div class="ai-title">${a.title}</div><div class="ai-desc">${a.desc}</div></div>${a.amount?`<div style="font-weight:700;font-size:12px;flex-shrink:0">${eur(a.amount)}</div>`:""}</div>`;
-    });
-  }
-
-  // AI insights
-  if(insights.alerts.length>0){
-    insights.alerts.forEach(a=>{
-      h+=`<div class="action-item ai-info"><div class="ai-icon">${a.icon}</div><div class="ai-body"><div class="ai-desc">${a.text}</div></div></div>`;
-    });
-  }
-  h+=`</div>`;
 
   // 7-day chart
   h+=`<div class="card"><div class="stitle">7-Day Daily Cash Forecast</div>
