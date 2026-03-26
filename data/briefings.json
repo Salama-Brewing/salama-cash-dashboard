@@ -72,5 +72,20 @@
       "focus": "No new spend this week — continue approved campaigns, hold everything else until Monday"
     }
   },
-  "weekly": null
+  "weekly": {
+    "headline": "Collections behind plan — strong May order book ahead",
+    "highlights": [
+      "Overdue AR increased to €74K — Brill and Other Export accounts are the main drivers",
+      "Bank balance moved negative (−€5,200) for the first time this quarter — manageable but needs monitoring",
+      "Bemböle contract paid on time — €25K received as expected",
+      "May–June order book looks strong across domestic channels; summer volume on track",
+      "Raw material costs for Q2 need cash approval — €80–100K estimate for April orders"
+    ],
+    "decisions_needed": [
+      "Authorise OP credit line draw (up to €20K) as payroll buffer if Brill and B&P don't pay by Friday",
+      "Approve April raw material purchase orders before end of week to secure summer brewing capacity",
+      "Decide on China order timing — needs to appear in the Forecast scenario to reflect full-year cash impact"
+    ],
+    "trend": "worsening"
+  }
 }
