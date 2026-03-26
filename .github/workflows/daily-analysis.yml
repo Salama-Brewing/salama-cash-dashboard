@@ -50,7 +50,7 @@ jobs:
         run: |
           git config user.name  "Salama Cash Bot"
           git config user.email "bot@salama-brewing.fi"
-          git add data/insights.json
+          git add data/insights.json data/briefings.json data/action_log.json
           # Only commit if there are changes
-          git diff --staged --quiet || git commit -m "chore: AI cash analysis $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git diff --staged --quiet || git commit -m "chore: AI cash analysis + briefings $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push

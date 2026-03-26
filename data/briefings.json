@@ -1,0 +1,76 @@
+{
+  "generated_at": "2026-03-26T03:00:00.000Z",
+  "is_monday": false,
+  "run_type": "morning",
+  "unclosed_count": 2,
+  "unclosed": [
+    {
+      "id": "sales-1",
+      "role": "sales",
+      "text": "Chase Export (Brill) invoice #1020 — €14,302 now 15 days overdue",
+      "urgent": true,
+      "invoiceId": 1020,
+      "days_open": 2,
+      "source_date": "2026-03-24"
+    },
+    {
+      "id": "sales-2",
+      "role": "sales",
+      "text": "Follow up Bars & Pubs FI invoice #1018 — €14,651 overdue 21 days",
+      "urgent": true,
+      "invoiceId": 1018,
+      "days_open": 2,
+      "source_date": "2026-03-24"
+    }
+  ],
+  "roles": {
+    "ceo": {
+      "status": "amber",
+      "headline": "€74K overdue — export collections must close before Friday payroll",
+      "cash_position": "Bank −€5,200 today; €62,781 fixed costs due by month-end",
+      "ar_summary": "€215K open AR, €74K overdue across 6 invoices — Brill & B&P are the main exposure",
+      "runway": "Approx 3–4 weeks at current burn if overdue AR stays unpaid; sufficient if Brill pays this week",
+      "narrative": "Two export invoices (Brill €14,302 and Other Export €25,200) are 11–21 days overdue and together with Bars & Pubs FI create a €74K collection gap. Fixed payroll and loan repayment of €62,781 hit by 28 March — the bank balance needs to turn positive by Monday. If Brill confirms payment this week, cash position normalises. If not, a short-term credit line draw needs authorisation today.",
+      "actions": [
+        {"id": "ceo-1", "text": "Authorise sales team to escalate Brill to director-level contact if no payment confirmation by 14:00 today", "urgent": true, "invoiceId": 1020},
+        {"id": "ceo-2", "text": "Confirm with finance: if Brill doesn't pay by Friday, draw €20K on OP credit facility for payroll buffer", "urgent": true, "invoiceId": null},
+        {"id": "ceo-3", "text": "Review raw material orders for April — delay non-critical POs by 1 week to protect cash", "urgent": false, "invoiceId": null}
+      ],
+      "focus": "Cash bridge for payroll: confirm Brill payment ETA or authorise credit line draw — decide by 14:00"
+    },
+    "sales": {
+      "status": "red",
+      "headline": "3 customers with overdue invoices need direct calls today — not emails",
+      "narrative": "Export (Brill) invoice #1020 for €14,302 is now 15 days overdue — this was flagged yesterday and no payment confirmation received. Bars & Pubs FI has two overdue invoices totalling €35,392 (21 and 11 days late). Other Export invoice #1019 at €25,200 is 11 days overdue. Combined €74K. Call, not email — get a confirmed payment date with a calendar invite.",
+      "actions": [
+        {"id": "sales-1", "text": "Call Brill contact directly — get written payment commitment for #1020 (€14,302) by end of day", "urgent": true, "invoiceId": 1020},
+        {"id": "sales-2", "text": "Call Bars & Pubs FI: chase #1018 (€14,651, 21d) and #1007 (€20,741) — agree a payment plan if needed", "urgent": true, "invoiceId": 1018},
+        {"id": "sales-3", "text": "Call Other Export contact for #1019 (€25,200) — confirm week of payment", "urgent": true, "invoiceId": 1019},
+        {"id": "sales-4", "text": "Flag Kesko invoices #1000 and #1001 (€18,600 combined) — both overdue, escalate if no response by tomorrow", "urgent": false, "invoiceId": 1000}
+      ],
+      "focus": "Phone calls only today — three calls before noon, get written payment confirmations before 17:00"
+    },
+    "production": {
+      "status": "amber",
+      "headline": "April raw material orders need cash approval before Friday",
+      "narrative": "Summer brewing ramp starts in April. Raw material orders for May–June production (malt, hops, packaging) need to go out by end of April to secure capacity. Current AP outstanding is €74K — Cans & Packaging invoice #5003 is already overdue. Production schedule is safe for March but April funding depends on this week's AR collections.",
+      "actions": [
+        {"id": "prod-1", "text": "Submit April raw material order list to CEO/Finance for cash approval — needed by Friday 28 March", "urgent": false, "invoiceId": null},
+        {"id": "prod-2", "text": "Confirm Cans & Packaging (#5003, €8,807 overdue) payment with finance — supplier may hold next delivery", "urgent": true, "invoiceId": null},
+        {"id": "prod-3", "text": "Map inventory days for May-peak planning — share estimate with CEO for working capital forecast", "urgent": false, "invoiceId": null}
+      ],
+      "focus": "Get April material orders approved this week — any delay in ordering risks summer capacity"
+    },
+    "marketing": {
+      "status": "green",
+      "headline": "Hold all non-committed spend this week — cash is tight",
+      "narrative": "Bank balance is negative and the business has €74K in overdue AR to collect before end-March payroll. This week is not the time for new campaign spend commitments. All approved campaigns can proceed. Any new spend requests above €500 should wait until next week when collection picture is clearer.",
+      "actions": [
+        {"id": "mkt-1", "text": "Pause any unconfirmed spend requests this week — resubmit from Monday 30 March if collections clear", "urgent": false, "invoiceId": null},
+        {"id": "mkt-2", "text": "China market launch prep: timeline is fine, but budget approval will follow Q2 cash review — flag if vendor deposits are needed ahead of collections", "urgent": false, "invoiceId": null}
+      ],
+      "focus": "No new spend this week — continue approved campaigns, hold everything else until Monday"
+    }
+  },
+  "weekly": null
+}

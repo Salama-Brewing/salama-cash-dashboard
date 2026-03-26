@@ -101,6 +101,50 @@ tr.urg-row{background:#FEF2F2!important}
 .lever-lbl{font-size:12px;font-weight:600;width:200px;flex-shrink:0}
 .lever-slider{flex:1;accent-color:#E91E8C}
 .lever-val{width:40px;text-align:right;font-weight:700;font-size:12px;color:#E91E8C;flex-shrink:0}
+/* ── Briefings tab ─────────────────────────────────────── */
+.brief-meta{font-size:11px;color:#9CA3AF;margin-top:2px}
+.role-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.role-btn{padding:7px 18px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid #E5E7EB;background:#fff;color:#6B7280;transition:all .2s}
+.role-btn.active{border-color:#E91E8C;background:#E91E8C;color:#fff}
+.role-btn:hover:not(.active){border-color:#D1D5DB;background:#F9FAFB;color:#374151}
+.brief-status{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:8px;margin-bottom:10px}
+.brief-status.red{background:#FEF2F2;border:2px solid #DC2626}
+.brief-status.amber{background:#FFFBEB;border:2px solid #D97706}
+.brief-status.green{background:#F0FDF4;border:2px solid #16A34A}
+.brief-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.brief-dot.red{background:#DC2626}
+.brief-dot.amber{background:#D97706}
+.brief-dot.green{background:#16A34A}
+.brief-headline{font-size:15px;font-weight:700;flex:1}
+.brief-headline.red{color:#991B1B}
+.brief-headline.amber{color:#92400E}
+.brief-headline.green{color:#166534}
+.unclosed-box{background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.unclosed-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#92400E;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.unclosed-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #FDE68A;font-size:12px;color:#78350F;gap:10px}
+.unclosed-item:last-child{border-bottom:none}
+.unclosed-days{font-size:10px;background:#FCD34D;color:#78350F;padding:1px 7px;border-radius:8px;font-weight:700;flex-shrink:0}
+.unclosed-dismiss{font-size:10px;border:none;background:none;color:#D97706;cursor:pointer;font-weight:700;flex-shrink:0;padding:2px 6px;border-radius:4px}
+.unclosed-dismiss:hover{background:#FDE68A}
+.brief-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#9CA3AF;margin:12px 0 6px}
+.brief-action{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:6px;margin-bottom:5px;font-size:12px;border:1px solid #E5E7EB;background:#fff}
+.brief-action.urgent{background:#FFF7F7;border-color:#FECACA}
+.brief-action-num{width:20px;height:20px;border-radius:50%;background:#E91E8C;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.brief-action-num.urgent{background:#DC2626}
+.brief-action-text{flex:1;line-height:1.4;color:#1F2937}
+.brief-narrative{font-size:13px;line-height:1.6;color:#374151;padding:12px;background:#F9FAFB;border-radius:6px;margin-bottom:8px}
+.brief-focus{font-size:12px;font-weight:700;color:#E91E8C;padding:8px 12px;background:#FDF2F8;border-radius:6px;border-left:3px solid #E91E8C}
+.brief-kpi-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.brief-kpi{flex:1;min-width:120px;background:#fff;border:1px solid #E5E7EB;border-radius:6px;padding:8px 12px}
+.brief-kpi-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:#9CA3AF}
+.brief-kpi-val{font-size:13px;font-weight:700;margin-top:2px}
+.weekly-box{background:linear-gradient(135deg,#1A1A2E,#16213E);color:#fff;border-radius:8px;padding:14px;margin-top:10px}
+.weekly-box .stitle{color:#E91E8C;margin-bottom:10px}
+.weekly-hl{display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:12px;line-height:1.4}
+.weekly-hl:last-child{border-bottom:none}
+.brief-placeholder{text-align:center;padding:48px 24px;color:#9CA3AF}
+.brief-placeholder h3{font-size:18px;color:#374151;margin-bottom:8px}
+.brief-placeholder p{font-size:13px;line-height:1.6;max-width:400px;margin:0 auto}
 </style>
 </head>
 <body>
@@ -120,6 +164,8 @@ var cashData=null, CC={}, hOpen=false, hMsgs=[];
 (function load(){
   // Load AI insights if available
   fetch('data/insights.json').then(r=>r.ok?r.json():Promise.reject()).then(d=>{window.__insights=d;}).catch(()=>{});
+  // Load role briefings if available
+  fetch('data/briefings.json').then(r=>r.ok?r.json():Promise.reject()).then(d=>{window.__briefings=d;}).catch(()=>{});
   var D={meta:{mode:"demo"},bank:{balance:-5200,balance_date:"2026-03-25"},
     receivables:{total_open:214900,invoice_count:25,
       aging:{"0_30":197500,"31_60":14200,"61_90":3200,"90_plus":0},
@@ -436,11 +482,17 @@ function statusBadge(s){return`<span class="badge ${s==="OVERDUE"?"b-red":s==="P
 // ════════════════════════════════════════════════════════════
 // STATE
 // ════════════════════════════════════════════════════════════
-var S={tab:"today",scenario:"budget",editMode:false,
+var S={tab:"today",scenario:"budget",editMode:false,briefingRole:"ceo",briefingView:"daily",
   levers:{barsAndPubsDso:41,otherExportDso:52,supplierDpo:22,invDays:42},
   customChannels:null,customDir:null,customExp:null,customPers:47425,customLoan:15356,
   // Saved forecast (populated when user clicks "Save as Forecast" from Custom)
   forecastChannels:null,forecastDir:null,forecastExp:null};
+
+function setBriefingRole(r){S.briefingRole=r;render();}
+function setBriefingView(v){S.briefingView=v;render();}
+
+function getDismissed(){try{return JSON.parse(localStorage.getItem('sb_dismissed')||'[]');}catch(_){return[];}}
+function dismissAction(id){var d=getDismissed();if(!d.includes(id)){d.push(id);localStorage.setItem('sb_dismissed',JSON.stringify(d));render();}}
 
 function setTab(t){S.tab=t;render();}
 function setScen(s){if(s==="custom")initCustom();S.scenario=s;render();}
@@ -655,6 +707,7 @@ function render(){
     <button class="tab ${S.tab==="customers"?"active":""}" onclick="setTab('customers')">Customers & Suppliers</button>
     <button class="tab ${S.tab==="budget"?"active":""}" onclick="setTab('budget')">Budget Breakdown</button>
     <button class="tab ${S.tab==="wc"?"active":""}" onclick="setTab('wc')">Working Capital</button>
+    <button class="tab ${S.tab==="briefings"?"active":""}" onclick="setTab('briefings')">📋 Briefings</button>
   </div>
 </div>
 <div class="content">`;
@@ -687,6 +740,11 @@ function render(){
   // ── WORKING CAPITAL ───────────────────────────────────────
   if(S.tab==="wc"){
     html+=buildWCTab();
+  }
+
+  // ── BRIEFINGS ─────────────────────────────────────────────
+  if(S.tab==="briefings"){
+    html+=buildBriefingsTab();
   }
 
   html+=`</div>`;
@@ -1561,6 +1619,142 @@ function drawWCChart(){
         tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw<0?"−€":"€"}${Math.abs(Math.round(ctx.raw||0)).toLocaleString("fi-FI")}`}}},
       scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>(v<0?"−€":"€")+Math.abs(v/1000).toFixed(0)+"K"}}}}});
   });
+}
+
+// ════════════════════════════════════════════════════════════
+// TAB: BRIEFINGS
+// ════════════════════════════════════════════════════════════
+function buildBriefingsTab(){
+  var b=window.__briefings;
+  var dismissed=getDismissed();
+
+  // ── No briefings yet ───────────────────────────────────────────────────────
+  if(!b||!b.roles){
+    return`<div class="brief-placeholder">
+      <div style="font-size:48px;margin-bottom:12px">📋</div>
+      <h3>Briefings Not Yet Generated</h3>
+      <p>The AI briefing system will run automatically at <strong>06:00 and 17:00 Helsinki time</strong> on weekdays via GitHub Actions.</p>
+      <p style="margin-top:12px">To generate your first briefing now, run <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:12px">node analyze.js</code> locally with your Anthropic API key.</p>
+    </div>`;
+  }
+
+  var isMonday=b.is_monday;
+  var runType=b.run_type==="morning"?"Morning":"Evening";
+  var genDate=b.generated_at?new Date(b.generated_at):new Date();
+  var dateStr=genDate.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  var timeStr=genDate.toLocaleTimeString("fi-FI",{hour:"2-digit",minute:"2-digit"});
+
+  // ── Role tabs ──────────────────────────────────────────────────────────────
+  var roles=[
+    {id:"ceo",  label:"CEO / CFO"},
+    {id:"sales",label:"Sales"},
+    {id:"production",label:"Production"},
+    {id:"marketing",label:"Marketing"},
+  ];
+  if(isMonday&&b.weekly) roles.push({id:"weekly",label:"📅 Weekly"});
+
+  var roleTabs=roles.map(r=>`<button class="role-btn ${S.briefingRole===r.id?"active":""}" onclick="setBriefingRole('${r.id}')">${r.label}</button>`).join("");
+
+  // ── Unclosed actions (cross-role) ──────────────────────────────────────────
+  var unclosedAll=(b.unclosed||[]).filter(a=>!dismissed.includes(a.id));
+  var unclosedBox="";
+  if(unclosedAll.length>0){
+    var items=unclosedAll.map(a=>`
+      <div class="unclosed-item">
+        <span style="flex:1">${a.text}</span>
+        <span class="unclosed-days">${a.days_open}d open</span>
+        <button class="unclosed-dismiss" onclick="dismissAction('${a.id}')" title="Mark as done">✓ Done</button>
+      </div>`).join("");
+    unclosedBox=`<div class="unclosed-box">
+      <div class="unclosed-title">⚠️ Not followed up from previous briefing${unclosedAll.length>1?"s":""}</div>
+      ${items}
+    </div>`;
+  }
+
+  // ── Weekly view ────────────────────────────────────────────────────────────
+  if(S.briefingRole==="weekly"&&b.weekly){
+    var w=b.weekly;
+    var trendIcon=w.trend==="improving"?"📈":w.trend==="worsening"?"📉":"➡️";
+    var hlItems=(w.highlights||[]).map(h=>`<div class="weekly-hl"><span style="margin-top:2px">•</span><span>${h}</span></div>`).join("");
+    var decItems=(w.decisions_needed||[]).map((d,i)=>`
+      <div class="brief-action">
+        <div class="brief-action-num">${i+1}</div>
+        <div class="brief-action-text">${d}</div>
+      </div>`).join("");
+
+    return`
+<div class="card" style="margin-bottom:8px">
+  <div class="stitle">📋 Weekly Briefing — ${dateStr}</div>
+  <div class="brief-meta">Monday morning · Management team meeting · ${trendIcon} Trend: ${w.trend||"stable"}</div>
+</div>
+<div class="role-tabs">${roleTabs}</div>
+${unclosedBox}
+<div class="card">
+  <div class="brief-section-title">Week at a glance</div>
+  <div class="brief-headline amber" style="font-size:14px;margin-bottom:10px">${w.headline||""}</div>
+  <div class="weekly-box">
+    <div class="stitle">Last week highlights</div>
+    ${hlItems}
+  </div>
+  <div class="brief-section-title" style="margin-top:12px">Decisions needed this week</div>
+  ${decItems||"<p style='font-size:12px;color:#6B7280'>No decisions flagged</p>"}
+</div>`;
+  }
+
+  // ── Role briefing ──────────────────────────────────────────────────────────
+  var role=S.briefingRole||"ceo";
+  var rd=(b.roles||{})[role];
+  if(!rd){
+    return`<div class="card" style="text-align:center;padding:32px;color:#9CA3AF">No briefing data for this role yet.</div>`;
+  }
+
+  var status=rd.status||"amber";
+  var statusLabel=status==="red"?"🔴 URGENT ATTENTION":status==="amber"?"🟠 NEEDS ATTENTION":"🟢 ON TRACK";
+  var actionsHtml=(rd.actions||[]).filter(a=>!dismissed.includes(a.id)).map((a,i)=>`
+    <div class="brief-action ${a.urgent?"urgent":""}">
+      <div class="brief-action-num ${a.urgent?"urgent":""}">${i+1}</div>
+      <div class="brief-action-text">${a.text}</div>
+      ${a.urgent?`<span class="badge b-red" style="flex-shrink:0">Urgent</span>`:""}
+      <button class="unclosed-dismiss" onclick="dismissAction('${a.id}')" title="Mark done">✓</button>
+    </div>`).join("")||`<p style="font-size:12px;color:#6B7280;padding:8px">No actions flagged</p>`;
+
+  // CEO gets extra financial KPIs
+  var kpiRow="";
+  if(role==="ceo"&&(rd.cash_position||rd.ar_summary||rd.runway)){
+    var kpis=[
+      rd.cash_position?{l:"Cash Position",v:rd.cash_position}:null,
+      rd.ar_summary?{l:"AR Overview",v:rd.ar_summary}:null,
+      rd.runway?{l:"Runway",v:rd.runway}:null,
+    ].filter(Boolean);
+    kpiRow=`<div class="brief-kpi-row">${kpis.map(k=>`
+      <div class="brief-kpi">
+        <div class="brief-kpi-lbl">${k.l}</div>
+        <div class="brief-kpi-val" style="font-size:11px;font-weight:600;color:#374151">${k.v}</div>
+      </div>`).join("")}</div>`;
+  }
+
+  return`
+<div class="card" style="margin-bottom:8px">
+  <div class="stitle">📋 ${runType} Briefing — ${dateStr}</div>
+  <div class="brief-meta">Generated ${timeStr} · AI-powered · ${b.unclosed_count>0?`<span style="color:#D97706;font-weight:600">${b.unclosed_count} unclosed from yesterday</span>`:"All previous actions followed up"}</div>
+</div>
+<div class="role-tabs">${roleTabs}</div>
+${unclosedBox}
+<div class="brief-status ${status}">
+  <div class="brief-dot ${status}"></div>
+  <div>
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;opacity:.7;margin-bottom:2px">${statusLabel}</div>
+    <div class="brief-headline ${status}">${rd.headline||""}</div>
+  </div>
+</div>
+<div class="card">
+  ${kpiRow}
+  <div class="brief-section-title">Situation</div>
+  <div class="brief-narrative">${rd.narrative||"No narrative available."}</div>
+  <div class="brief-focus">${rd.focus||""}</div>
+  <div class="brief-section-title" style="margin-top:12px">Actions</div>
+  ${actionsHtml}
+</div>`;
 }
 
 // ════════════════════════════════════════════════════════════

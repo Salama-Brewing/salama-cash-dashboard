@@ -24,9 +24,11 @@ const fs   = require('fs');
 const path = require('path');
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────
-const MODEL      = 'claude-haiku-4-5-20251001';
-const OUTPUT     = path.join(__dirname, 'data', 'insights.json');
-const TODAY      = new Date();
+const MODEL           = 'claude-haiku-4-5-20251001';
+const OUTPUT          = path.join(__dirname, 'data', 'insights.json');
+const BRIEFINGS_OUT   = path.join(__dirname, 'data', 'briefings.json');
+const ACTION_LOG_PATH = path.join(__dirname, 'data', 'action_log.json');
+const TODAY           = new Date();
 
 // Baseline DSO profiles — must match dashboard PROFILES object
 const DSO_BASELINES = {
@@ -205,6 +207,182 @@ Analyze and return ONLY valid JSON (no markdown, no extra text):
 }`;
 }
 
+// ─── ACTION LOG ──────────────────────────────────────────────────────────────
+function loadActionLog() {
+  try { return JSON.parse(fs.readFileSync(ACTION_LOG_PATH, 'utf8')); }
+  catch (_) { return { history: [] }; }
+}
+
+function getUnclosedActions(actionLog, invoices) {
+  const cutoff = new Date(TODAY);
+  cutoff.setDate(cutoff.getDate() - 5); // look back 5 days
+
+  const paidIds = new Set(
+    invoices.filter(i => i.status === 'PAID' && i.paidDate).map(i => String(i.id))
+  );
+
+  const unclosed = [];
+  for (const entry of (actionLog.history || [])) {
+    const entryDate = new Date(entry.date);
+    if (entryDate < cutoff) continue;
+    const daysSince = Math.max(1, Math.round((TODAY - entryDate) / 86400000));
+    for (const action of (entry.actions || [])) {
+      if (action.status === 'closed') continue;
+      // Auto-resolve if the related invoice is now paid
+      if (action.invoiceId && paidIds.has(String(action.invoiceId))) continue;
+      unclosed.push({ ...action, days_open: daysSince, source_date: entry.date });
+    }
+  }
+  return unclosed;
+}
+
+function updateActionLog(actionLog, newActions) {
+  const today = TODAY.toISOString().slice(0, 10);
+  const cutoff = new Date(TODAY);
+  cutoff.setDate(cutoff.getDate() - 14);
+  const history = (actionLog.history || []).filter(e => new Date(e.date) >= cutoff);
+  // Replace today's entry if it exists (idempotent on re-runs)
+  const filtered = history.filter(e => e.date !== today);
+  filtered.push({ date: today, actions: newActions });
+  filtered.sort((a, b) => a.date.localeCompare(b.date));
+  return { history: filtered };
+}
+
+// ─── BRIEFING PROMPT ─────────────────────────────────────────────────────────
+function buildBriefingPrompt(invoices, insights, unclosedActions) {
+  const isMonday = TODAY.getDay() === 1;
+  const hour     = TODAY.getUTCHours();
+  const runType  = hour < 12 ? 'Morning' : 'Evening';
+
+  const open     = invoices.filter(i => i.status !== 'PAID');
+  const overdue  = open.filter(i => i.status === 'OVERDUE' || new Date(i.dueDate) < TODAY);
+  const totalOpen    = open.reduce((s, i) => s + i.amount, 0);
+  const totalOverdue = overdue.reduce((s, i) => s + i.amount, 0);
+
+  // Overdue grouped by customer, sorted by total desc
+  const byCustomer = {};
+  overdue.forEach(inv => {
+    if (!byCustomer[inv.customer]) byCustomer[inv.customer] = { total: 0, items: [] };
+    const daysLate = Math.round((TODAY - new Date(inv.dueDate)) / 86400000);
+    byCustomer[inv.customer].total += inv.amount;
+    byCustomer[inv.customer].items.push(`#${inv.id} €${Math.round(inv.amount).toLocaleString()} (${daysLate}d late)`);
+  });
+  const overdueLines = Object.entries(byCustomer)
+    .sort((a, b) => b[1].total - a[1].total)
+    .map(([c, d]) => `  ${c}: €${Math.round(d.total).toLocaleString()} — ${d.items.join(', ')}`)
+    .join('\n') || '  None';
+
+  const unclosedLines = unclosedActions.length
+    ? unclosedActions.map(a =>
+        `  [${(a.role||'ALL').toUpperCase()}] "${a.text}" — ${a.days_open}d open${a.invoiceId ? ` (inv#${a.invoiceId})` : ''}`)
+      .join('\n')
+    : '  None — clean slate';
+
+  const urgentAlerts = (insights.alerts || []).filter(a => a.level === 'urgent').map(a => a.message).join('; ') || 'none';
+
+  return `You are generating ${runType}${isMonday ? ' Monday' : ''} management briefings for Salama Brewing Company Oy.
+Finnish craft brewery. €2.4M revenue target 2026. Growing fast (~62% YoY). Team is small — every hour matters.
+Date: ${TODAY.toISOString().slice(0,10)} — ${runType} run.
+${isMonday ? 'TODAY IS MONDAY — add a "weekly" section for the team meeting.\n' : ''}
+CASH SNAPSHOT:
+  Open AR: €${Math.round(totalOpen).toLocaleString()} across ${open.length} invoices
+  Overdue: €${Math.round(totalOverdue).toLocaleString()} across ${overdue.length} invoices
+  Fixed monthly costs: €62,781 (salary + OP loan — cannot be deferred)
+  Biggest cash risk this week: ${insights.weekly_cash_risk || 'n/a'}
+  Urgent alerts: ${urgentAlerts}
+  WC note: ${insights.wc_note || 'n/a'}
+
+OVERDUE INVOICES (sorted by amount):
+${overdueLines}
+
+UNCLOSED ACTIONS FROM PREVIOUS BRIEFINGS:
+${unclosedLines}
+
+CUSTOMER PAYMENT PATTERNS:
+  Own channels (Espoo Shop, Online, Own Bars): 3–5d — fast cash, protect
+  Domestic trade (Kesko, SOK, Alko): 21–39d — generally reliable
+  Bars & Pubs FI: 41d avg but slow — follow up at 35d
+  Export (Brill, Systembolaget, Other): 48–57d — bulk of AR, long tail
+  Bemböle: €25K/month fixed contract, ends September 2026
+
+KEY CONTEXT:
+  August = peak production. Cash from Aug shipments arrives Oct–Nov.
+  Raw materials for summer must be ordered by end of April.
+  China export order planned later this year (not yet in forecast).
+
+Generate tight, role-specific briefings. Be specific: use customer names, amounts, dates.
+Each briefing must be readable in under 90 seconds. Status must reflect real urgency.
+
+Return ONLY valid JSON (no markdown, no explanation):
+{
+  "ceo": {
+    "status": "green|amber|red",
+    "headline": "<12 words max — the one thing the CEO/CFO must know>",
+    "cash_position": "<current cash + what changes this week in one line>",
+    "ar_summary": "<total open + overdue split + biggest exposure in one line>",
+    "runway": "<at current burn, how many weeks of cash runway — be specific>",
+    "narrative": "<2–3 sentences: financial situation + what's at risk + decision needed>",
+    "actions": [
+      {"id": "ceo-1", "text": "<specific action — financial, operational, or approval>", "urgent": true, "invoiceId": <number or null>}
+    ],
+    "focus": "<one sentence: CFO-level priority — what financial lever to pull today>"
+  },
+  "sales": {
+    "status": "green|amber|red",
+    "headline": "<key collection message>",
+    "narrative": "<AR situation + who to call + DSO trend>",
+    "actions": [
+      {"id": "sales-1", "text": "<specific customer or invoice action>", "urgent": true, "invoiceId": <number or null>}
+    ],
+    "focus": "<one sentence>"
+  },
+  "production": {
+    "status": "green|amber|red",
+    "headline": "<funding or scheduling message>",
+    "narrative": "<raw material funding gap + timing + what's at risk>",
+    "actions": [
+      {"id": "prod-1", "text": "<raw material, schedule, or supplier action>", "urgent": false, "invoiceId": null}
+    ],
+    "focus": "<one sentence>"
+  },
+  "marketing": {
+    "status": "green|amber|red",
+    "headline": "<spend vs cash position>",
+    "narrative": "<what spend is safe + what to hold + campaign timing vs cash>",
+    "actions": [
+      {"id": "mkt-1", "text": "<spend approval or hold action>", "urgent": false, "invoiceId": null}
+    ],
+    "focus": "<one sentence>"
+  }${isMonday ? `,
+  "weekly": {
+    "headline": "<week ahead in 10 words>",
+    "highlights": ["<3–5 bullets: what happened last week, what changed, what's at risk>"],
+    "decisions_needed": ["<2–3 decisions management must make this week>"],
+    "trend": "improving|stable|worsening"
+  }` : ''}
+}`;
+}
+
+function extractActionsForLog(briefings) {
+  const roles = ['ceo', 'sales', 'production', 'marketing'];
+  const actions = [];
+  roles.forEach(role => {
+    const b = briefings[role];
+    if (!b || !b.actions) return;
+    b.actions.forEach(a => {
+      actions.push({
+        id:        a.id || `${role}-${Date.now()}`,
+        role,
+        text:      a.text,
+        urgent:    a.urgent || false,
+        invoiceId: a.invoiceId || null,
+        status:    'open',
+      });
+    });
+  });
+  return actions;
+}
+
 // ─── ANTHROPIC API CALL ─────────────────────────────────────────────────────
 function callClaude(apiKey, prompt) {
   return new Promise((resolve, reject) => {
@@ -296,7 +474,7 @@ async function main() {
     }
   }
 
-  // Save output
+  // Save insights
   const output = {
     generated_at:    TODAY.toISOString(),
     model:           MODEL,
@@ -309,9 +487,60 @@ async function main() {
 
   fs.mkdirSync(path.dirname(OUTPUT), { recursive: true });
   fs.writeFileSync(OUTPUT, JSON.stringify(output, null, 2));
+  console.log('\n✓ Insights saved to:', OUTPUT);
+
+  // ── Generate role briefings ──────────────────────────────────────────────
+  const actionLog       = loadActionLog();
+  const unclosedActions = getUnclosedActions(actionLog, invoices);
+  console.log(`Unclosed actions carried over: ${unclosedActions.length}`);
+
+  const briefingPrompt = buildBriefingPrompt(invoices, insights, unclosedActions);
+  console.log('\nGenerating role briefings...');
+  let briefingRaw;
+  try {
+    briefingRaw = await callClaude(args.key, briefingPrompt);
+  } catch(e) {
+    console.warn('Briefing API call failed (insights already saved):', e.message);
+    briefingRaw = null;
+  }
+
+  let briefings = null;
+  if (briefingRaw) {
+    try {
+      briefings = JSON.parse(briefingRaw);
+    } catch(_) {
+      const match = briefingRaw.match(/\{[\s\S]*\}/);
+      if (match) try { briefings = JSON.parse(match[0]); } catch(e2) { console.warn('Could not parse briefings JSON'); }
+    }
+  }
+
+  if (briefings) {
+    const newActions = extractActionsForLog(briefings);
+    const updatedLog = updateActionLog(actionLog, newActions);
+
+    const briefingOutput = {
+      generated_at:   TODAY.toISOString(),
+      is_monday:      TODAY.getDay() === 1,
+      run_type:       TODAY.getUTCHours() < 12 ? 'morning' : 'evening',
+      unclosed_count: unclosedActions.length,
+      unclosed:       unclosedActions,
+      roles:          { ceo: briefings.ceo, sales: briefings.sales, production: briefings.production, marketing: briefings.marketing },
+      weekly:         briefings.weekly || null,
+    };
+
+    fs.writeFileSync(BRIEFINGS_OUT,   JSON.stringify(briefingOutput, null, 2));
+    fs.writeFileSync(ACTION_LOG_PATH, JSON.stringify(updatedLog,     null, 2));
+    console.log('✓ Briefings saved to:', BRIEFINGS_OUT);
+    console.log('✓ Action log updated:', ACTION_LOG_PATH);
+
+    // Print CEO headline
+    const ceo = briefings.ceo || {};
+    console.log(`\n─── CEO Briefing [${(ceo.status||'?').toUpperCase()}] ──────────────────────`);
+    console.log(ceo.headline || '(none)');
+    if (ceo.actions?.length) ceo.actions.forEach((a,i) => console.log(`  ${i+1}. ${a.urgent?'🔴 ':''}${a.text}`));
+  }
 
   // Print summary
-  console.log('\n✓ Saved to:', OUTPUT);
   console.log('\n─── Top Action ───────────────────────────────');
   console.log(insights.top_action || '(none)');
   console.log('\n─── Weekly Cash Risk ─────────────────────────');
