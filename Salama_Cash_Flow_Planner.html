@@ -106,6 +106,7 @@ tr.urg-row{background:#FEF2F2!important}
 <body>
 <div id="app"></div>
 <script>window.__chartReady=false;</script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"
   onload="window.__chartReady=true"
   onerror="var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js';s.onload=function(){window.__chartReady=true};document.head.appendChild(s)">
@@ -221,7 +222,10 @@ var CHANNELS=[
   {name:"Kesko",           rev:[27020,29316,44296,37247,37247,43554,30093,32424,32424], dso:28, color:"rgba(22,163,74,.8)"},
   {name:"SOK",             rev:[20530,20530,20530,20530,20530,20530,20530,20530,20530], dso:38, color:"rgba(5,150,105,.8)"},
   {name:"Bars & Pubs FI",  rev:[27900,31000,34100,34100,34100,27900,27900,31000,31000], dso:41, color:"rgba(245,158,11,.8)"},
-  {name:"Export (all)",    rev:[55600,49650,34730,61290,113350,64730,33950,48300,17530], dso:52,color:"rgba(239,68,68,.8)"},
+  {name:"Export — Brill",  rev:[25000,22300,15600,27500,50000,29000,15000,22000,8000],  dso:51, color:"rgba(239,68,68,.8)"},
+  {name:"Systembolaget",   rev:[8600, 8350, 6130, 9790, 16350,12730,8950, 12300,5530],  dso:48, color:"rgba(185,28,28,.8)"},
+  {name:"Export — China",  rev:[0,    0,    0,    0,    0,    0,    0,    0,    0],      dso:60, color:"rgba(220,38,38,.5)"},
+  {name:"Export — Other",  rev:[22000,19000,13000,24000,47000,23000,10000,14000,4000],  dso:57, color:"rgba(252,165,165,.9)"},
   {name:"Bemböle Contract",rev:[25000,25000,25000,25000,25000,25000,25000,0,0],          dso:30, color:"rgba(14,165,233,.8)"},
   {name:"Distribution",    rev:[1200,1200,1200,1200,1200,1200,1200,1200,1200],           dso:30, color:"rgba(148,163,184,.8)"}
 ];
@@ -434,7 +438,9 @@ function statusBadge(s){return`<span class="badge ${s==="OVERDUE"?"b-red":s==="P
 // ════════════════════════════════════════════════════════════
 var S={tab:"today",scenario:"budget",editMode:false,
   levers:{barsAndPubsDso:41,otherExportDso:52,supplierDpo:22,invDays:42},
-  customChannels:null,customDir:null,customExp:null,customPers:47425,customLoan:15356};
+  customChannels:null,customDir:null,customExp:null,customPers:47425,customLoan:15356,
+  // Saved forecast (populated when user clicks "Save as Forecast" from Custom)
+  forecastChannels:null,forecastDir:null,forecastExp:null};
 
 function setTab(t){S.tab=t;render();}
 function setScen(s){if(s==="custom")initCustom();S.scenario=s;render();}
@@ -463,12 +469,117 @@ function setCustomRev(ci,mi,val){S.customChannels[ci].rev[mi]=Math.round(parseFl
 function setCustomDir(mi,val){S.customDir[mi]=Math.round(parseFloat(val)||0);render();}
 function setCustomExp(mi,val){S.customExp[mi]=Math.round(parseFloat(val)||0);render();}
 function toggleChannel(ci){S.customChannels[ci].disabled=!S.customChannels[ci].disabled;render();}
+function setCustomChannelName(ci,val){S.customChannels[ci].name=val;}
+function addCustomChannel(){
+  var colors=["rgba(139,92,246,.8)","rgba(236,72,153,.8)","rgba(251,191,36,.8)","rgba(16,185,129,.8)"];
+  var c=colors[S.customChannels.length%colors.length];
+  S.customChannels.push({name:"New Channel",dso:30,color:c,rev:[0,0,0,0,0,0,0,0,0],disabled:false});
+  S.editMode=true; render();
+}
+function removeCustomChannel(ci){S.customChannels.splice(ci,1);render();}
+
+function saveAsForecast(){
+  if(!S.customChannels)initCustom();
+  S.forecastChannels=S.customChannels.map(ch=>({...ch,rev:[...ch.rev]}));
+  S.forecastDir=S.customDir?[...S.customDir]:[...DIR12.slice(3)];
+  S.forecastExp=S.customExp?[...S.customExp]:[...EXP12.slice(3)];
+  S.scenario="pessimistic";S.editMode=false;
+  render();
+}
+
+function downloadExcel(){
+  if(typeof XLSX==="undefined"){alert("Excel library not loaded yet — please wait a moment and try again.");return;}
+  var mIdx=[3,4,5,6,7,8,9,10,11];
+  var months=["Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var revArr=getRevArray(),dirArr=getDirArray(),expArr=getExpArray();
+  var pers=getPers(),loan=getLoan();
+  var channels=(S.scenario==="custom"&&S.customChannels)?S.customChannels:
+               (S.scenario==="pessimistic"&&S.forecastChannels)?S.forecastChannels:CHANNELS;
+  var scenLabel=S.scenario==="custom"?"Custom":S.scenario==="pessimistic"?"Forecast":"Budget";
+  var wb=XLSX.utils.book_new();
+
+  // Sheet 1: Monthly Cash Flow
+  var cfRows=[["Month","Cash In (collections)","Cash Out (total)","Net Cash Flow","Running Balance"]];
+  var bal=APR1;
+  mIdx.forEach((i,j)=>{
+    var cin=Math.round(revArr[mIdx[j]-1]*0.85);
+    var cout=dirArr[i]+expArr[i]+pers+loan;
+    var net=cin-cout; bal=Math.round(bal+net);
+    cfRows.push([months[j],cin,-cout,net,bal]);
+  });
+  var cfSheet=XLSX.utils.aoa_to_sheet(cfRows);
+  cfSheet["!cols"]=[{wch:8},{wch:22},{wch:20},{wch:16},{wch:18}];
+  XLSX.utils.book_append_sheet(wb,cfSheet,"Cash Flow");
+
+  // Sheet 2: Revenue by Channel
+  var chRows=[["Channel","DSO (days)",...months,"Total"]];
+  channels.filter(ch=>!ch.disabled).forEach(ch=>{
+    var chRev=(S.scenario==="pessimistic"&&!S.forecastChannels)
+      ?ch.rev.map((v,i)=>Math.round(v*PESS12[mIdx[i]]/BUD12[mIdx[i]])):ch.rev;
+    chRows.push([ch.name,ch.dso,...chRev,chRev.reduce((s,v)=>s+v,0)]);
+  });
+  chRows.push(["TOTAL REVENUE","",...mIdx.map(i=>revArr[i]),mIdx.reduce((s,i)=>s+revArr[i],0)]);
+  chRows.push(["Cash Collected (≈30d lag)","",...mIdx.map((i,j)=>Math.round(revArr[mIdx[j]-1]*0.85)),""]);
+  var chSheet=XLSX.utils.aoa_to_sheet(chRows);
+  chSheet["!cols"]=[{wch:22},{wch:12},...months.map(()=>({wch:10})),{wch:12}];
+  XLSX.utils.book_append_sheet(wb,chSheet,"Revenue by Channel");
+
+  // Sheet 3: Costs breakdown
+  var cDir=S.scenario==="custom"&&S.customDir?S.customDir:S.scenario==="pessimistic"&&S.forecastDir?S.forecastDir:DIR12.slice(3);
+  var cExp=S.scenario==="custom"&&S.customExp?S.customExp:S.scenario==="pessimistic"&&S.forecastExp?S.forecastExp:EXP12.slice(3);
+  var costRows=[["Month","Direct Costs (COGS)","Expenses (OpEx)","Personnel","OP Loan","Total Outflows"]];
+  mIdx.forEach((i,j)=>{
+    costRows.push([months[j],cDir[j],cExp[j],pers,loan,cDir[j]+cExp[j]+pers+loan]);
+  });
+  costRows.push(["TOTAL","",cDir.reduce((s,v)=>s+v,0),cExp.reduce((s,v)=>s+v,0),pers*9,loan*9,
+    cDir.reduce((s,v)=>s+v,0)+cExp.reduce((s,v)=>s+v,0)+(pers+loan)*9]);
+  var costSheet=XLSX.utils.aoa_to_sheet(costRows);
+  costSheet["!cols"]=[{wch:8},{wch:20},{wch:18},{wch:12},{wch:10},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,costSheet,"Costs");
+
+  // Sheet 4: Full Year Summary
+  var q1Rev=BUD12[0]+BUD12[1]+BUD12[2];
+  var totalRev=mIdx.reduce((s,i)=>s+revArr[i],0);
+  var totalOut=mIdx.reduce((s,i)=>s+dirArr[i]+expArr[i]+pers+loan,0);
+  var summRows=[
+    ["Salama Brewing — Cash Flow Plan","",""],
+    ["Scenario",scenLabel,""],
+    ["Generated",new Date().toISOString().slice(0,10),""],
+    ["","",""],
+    ["FULL YEAR 2026","",""],
+    ["Jan–Mar actuals (revenue)",q1Rev,""],
+    ["Apr–Dec forecast (revenue)",totalRev,""],
+    ["Full Year Revenue",q1Rev+totalRev,""],
+    ["","",""],
+    ["Apr–Dec outflows",totalOut,""],
+    ["Opening balance (Apr 1)",APR1,""],
+    ["YE cash (Dec 31)","see Cash Flow tab",""],
+    ["","",""],
+    ["DSO PROFILES (days)","Baseline","Note"],
+    ...Object.entries({
+      "Kesko (direct)":28,"SOK Central":39,"Alko":21,"Own channels":4,
+      "Bars & Pubs FI":41,"Export — Brill":51,"Systembolaget":48,"Export — Other":57,"Export — China":60
+    }).map(([k,v])=>[k,v,""])
+  ];
+  var summSheet=XLSX.utils.aoa_to_sheet(summRows);
+  summSheet["!cols"]=[{wch:30},{wch:18},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,summSheet,"Summary");
+
+  XLSX.writeFile(wb,"Salama_Cashflow_"+scenLabel+"_"+new Date().toISOString().slice(0,10)+".xlsx");
+}
 
 // Return the correct 12-month revenue array for current scenario
 function getRevArray(){
-  if(S.scenario==="pessimistic")return PESS12;
+  if(S.scenario==="pessimistic"){
+    if(S.forecastChannels){
+      var arr=[...BUD12];for(var j=0;j<9;j++)arr[j+3]=0;
+      S.forecastChannels.forEach(ch=>{if(!ch.disabled)ch.rev.forEach((v,j2)=>{arr[j2+3]+=v;});});
+      return arr;
+    }
+    return PESS12;
+  }
   if(S.scenario==="custom"&&S.customChannels){
-    var arr=[...BUD12]; // Jan-Mar from budget, Apr-Dec from custom
+    var arr=[...BUD12];
     for(var j=0;j<9;j++)arr[j+3]=0;
     S.customChannels.forEach(ch=>{if(!ch.disabled)ch.rev.forEach((v,j)=>{arr[j+3]+=v;});});
     return arr;
@@ -476,15 +587,13 @@ function getRevArray(){
   return BUD12;
 }
 function getDirArray(){
-  if(S.scenario==="custom"&&S.customDir){
-    var a=[...DIR12];S.customDir.forEach((v,j)=>{a[j+3]=v;});return a;
-  }
+  if(S.scenario==="pessimistic"&&S.forecastDir){var a=[...DIR12];S.forecastDir.forEach((v,j)=>{a[j+3]=v;});return a;}
+  if(S.scenario==="custom"&&S.customDir){var a=[...DIR12];S.customDir.forEach((v,j)=>{a[j+3]=v;});return a;}
   return DIR12;
 }
 function getExpArray(){
-  if(S.scenario==="custom"&&S.customExp){
-    var a=[...EXP12];S.customExp.forEach((v,j)=>{a[j+3]=v;});return a;
-  }
+  if(S.scenario==="pessimistic"&&S.forecastExp){var a=[...EXP12];S.forecastExp.forEach((v,j)=>{a[j+3]=v;});return a;}
+  if(S.scenario==="custom"&&S.customExp){var a=[...EXP12];S.customExp.forEach((v,j)=>{a[j+3]=v;});return a;}
   return EXP12;
 }
 function getPers(){return S.scenario==="custom"?S.customPers:PERS;}
@@ -589,7 +698,7 @@ function render(){
   // Draw charts
   if(S.tab==="today"){var d7=build7Day(cd,gf);drawDailyChart(d7);}
   if(S.tab==="forecast"){var w13=build13Week(cd,S.scenario);draw13WeekChart(w13);}
-  if(S.tab==="budget"){drawChannelChart();}
+  if(S.tab==="budget"){drawCFChart();drawChannelChart();}
   if(S.tab==="wc"){drawCCCChart();drawWCChart();}
 }
 
@@ -687,7 +796,7 @@ function buildForecastTab(weeks){
   <div class="stitle" style="margin:0">13-Week Rolling Cash Forecast</div>
   <div class="scen-wrap">
     <button class="scen-btn ${S.scenario==="budget"?"active":""}" onclick="setScen('budget')">Budget</button>
-    <button class="scen-btn ${S.scenario==="pessimistic"?"active":""}" onclick="setScen('pessimistic')">Pessimistic</button>
+    <button class="scen-btn ${S.scenario==="pessimistic"?"active":""}" onclick="setScen('pessimistic')">Forecast</button>
     <button class="scen-btn ${S.scenario==="custom"?"active":""}" onclick="setScen('custom')">Custom ✏️</button>
   </div>
 </div>`;
@@ -890,22 +999,59 @@ function buildBudgetTab(){
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
     ${isCustom?`
       <button onclick="resetCustom('budget')" style="padding:4px 10px;border-radius:5px;border:1px solid #D1D5DB;background:#F3F4F6;color:#374151;font-size:11px;cursor:pointer">↺ Budget baseline</button>
-      <button onclick="resetCustom('pessimistic')" style="padding:4px 10px;border-radius:5px;border:1px solid #D1D5DB;background:#F3F4F6;color:#374151;font-size:11px;cursor:pointer">↺ Pessimistic baseline</button>
+      <button onclick="resetCustom('pessimistic')" style="padding:4px 10px;border-radius:5px;border:1px solid #D1D5DB;background:#F3F4F6;color:#374151;font-size:11px;cursor:pointer">↺ Forecast baseline</button>
       <button onclick="toggleEditMode()" style="padding:4px 12px;border-radius:5px;border:1px solid ${S.editMode?"#E91E8C":"#D1D5DB"};background:${S.editMode?"#E91E8C":"#fff"};color:${S.editMode?"#fff":"#374151"};font-size:11px;font-weight:700;cursor:pointer">${S.editMode?"✓ Done editing":"✏️ Edit numbers"}</button>
+      <button onclick="saveAsForecast()" style="padding:4px 12px;border-radius:5px;border:1px solid #2563EB;background:#EFF6FF;color:#2563EB;font-size:11px;font-weight:700;cursor:pointer">💾 Save as Forecast</button>
     `:""}
+    <button onclick="downloadExcel()" style="padding:4px 12px;border-radius:5px;border:1px solid #16A34A;background:#F0FDF4;color:#16A34A;font-size:11px;font-weight:700;cursor:pointer">⬇ Excel</button>
     <div class="scen-wrap">
       <button class="scen-btn ${!isPess&&!isCustom?"active":""}" onclick="setScen('budget')">Budget</button>
-      <button class="scen-btn ${isPess?"active":""}" onclick="setScen('pessimistic')">Pessimistic</button>
+      <button class="scen-btn ${isPess?"active":""}" onclick="setScen('pessimistic')">Forecast</button>
       <button class="scen-btn ${isCustom?"active":""}" onclick="setScen('custom')">Custom ✏️</button>
     </div>
   </div>
 </div>`;
 
+  // Cash flow chart — monthly cash in vs out vs balance
+  h+=`<div class="card" style="margin-bottom:10px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <div class="stitle" style="margin:0">Monthly Cash Flow — Apr to Dec 2026</div>
+    <div style="font-size:10px;color:#9CA3AF">Collections (DSO-adjusted) vs outflows → running balance from Apr 1 (${eur(APR1)})</div>
+  </div>
+  <div class="chart-wrap" style="height:240px"><canvas id="cfChart"></canvas></div>
+  <div class="note">Green bars = cash collected that month (prior month revenue at ~30d DSO lag). Red bars = total outflows (costs + salaries + loan). Pink line = running bank balance. Scenario: ${isCustom?"Custom":isPess?"Forecast":"Budget"}.</div>
+</div>`;
+
+  // Full-year totals (Jan–Mar near-actuals + Apr–Dec scenario)
+  var q1Rev=BUD12[0]+BUD12[1]+BUD12[2]; // 457,880
+  var q1Dir=DIR12[0]+DIR12[1]+DIR12[2];
+  var q1Exp=EXP12[0]+EXP12[1]+EXP12[2];
+  var q1Out=q1Dir+q1Exp+(PERS+LOAN)*3;
+  var fyRev=q1Rev+totalRev;
+  var fyOut=q1Out+totalOut;
+  var fyNet=fyRev-fyOut;
+
+  h+=`<div class="card" style="background:linear-gradient(135deg,#1A1A2E,#16213E);color:#fff;margin-bottom:10px">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+    <div>
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:#9CA3AF">Full Year 2026 — Jan–Mar actuals + Apr–Dec ${isCustom?"custom":isPess?"pessimistic":"budget"}</div>
+      <div style="font-size:22px;font-weight:700;margin-top:4px;color:#fff">${eur(fyRev)} <span style="font-size:13px;font-weight:400;color:#9CA3AF">revenue</span></div>
+    </div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap">
+      <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:#9CA3AF">Jan–Mar actuals</div><div style="font-weight:700;color:#6EE7B7">${eur(q1Rev)}</div></div>
+      <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:#9CA3AF">Apr–Dec forecast</div><div style="font-weight:700;color:#fff">${eur(totalRev)}</div></div>
+      <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:#9CA3AF">Full year outflows</div><div style="font-weight:700;color:#FCA5A5">${eur(fyOut)}</div></div>
+      <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:#9CA3AF">FY net</div><div style="font-weight:700;color:${fyNet>=0?"#6EE7B7":"#FCA5A5"}">${eur(fyNet)}</div></div>
+      <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:#9CA3AF">YE cash (Dec 31)</div><div style="font-weight:700;color:${Math.round(yeBalance)>=0?"#6EE7B7":"#FCA5A5"}">${eur(Math.round(yeBalance))}</div></div>
+    </div>
+  </div>
+</div>`;
+
   h+=`<div class="g4" style="margin-bottom:10px">
-  <div class="card"><div class="kpi-lbl">Total Revenue Apr–Dec ${isCustom?"(Custom)":isPess?"(Pessimistic)":"(Budget)"}</div>
+  <div class="card"><div class="kpi-lbl">Revenue Apr–Dec ${isCustom?"(Custom)":isPess?"(Forecast)":"(Budget)"}</div>
     <div class="kpi-val">${eur(totalRev)}</div>
     <div class="kpi-sub ${totalRev<totalBudRev?"txt-red":totalRev>totalBudRev?"txt-grn":""}">${totalRev<totalBudRev?eur(totalBudRev-totalRev)+" below budget":totalRev>totalBudRev?eur(totalRev-totalBudRev)+" above budget":"Same as budget"}</div></div>
-  <div class="card"><div class="kpi-lbl">Total Outflows Apr–Dec</div>
+  <div class="card"><div class="kpi-lbl">Outflows Apr–Dec</div>
     <div class="kpi-val txt-red">${eur(totalOut)}</div>
     <div class="kpi-sub">Direct + Expenses + Personnel + Loan</div></div>
   <div class="card"><div class="kpi-lbl">YE Cash (Dec 31)</div>
@@ -932,6 +1078,7 @@ function buildBudgetTab(){
 <thead><tr>
   ${isCustom?`<th style="text-align:center;width:28px">On</th>`:""}
   <th>Channel</th><th>DSO</th>${months.map(m=>`<th>${m}</th>`).join("")}<th>Total</th>
+  ${isCustom&&S.editMode?`<th></th>`:""}
 </tr></thead><tbody>`;
 
   channels.forEach((ch,ci)=>{
@@ -940,7 +1087,7 @@ function buildBudgetTab(){
     var total=chRev.reduce((s,v)=>s+v,0);
     h+=`<tr style="${isDisabled?"opacity:0.35":""}">
       ${isCustom?`<td style="text-align:center"><input type="checkbox" ${!ch.disabled?"checked":""} onchange="toggleChannel(${ci})" style="cursor:pointer;accent-color:#E91E8C;width:14px;height:14px"></td>`:""}
-      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${ch.color};margin-right:6px"></span>${ch.name}</td>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${ch.color};margin-right:6px"></span>${isCustom&&S.editMode?`<input type="text" value="${ch.name}" onchange="setCustomChannelName(${ci},this.value)" style="border:1px solid #D1D5DB;border-radius:3px;padding:1px 5px;font-size:11px;font-weight:600;width:140px">`:ch.name}</td>
       <td style="color:#9CA3AF">${ch.dso}d</td>`;
     chRev.forEach((v,mi)=>{
       if(isCustom&&S.editMode&&!isDisabled){
@@ -951,8 +1098,17 @@ function buildBudgetTab(){
         h+=`<td${isCustom&&!isDisabled?` onclick="S.editMode=true;render()" style="cursor:pointer" title="Click to edit"`:""}>${v>0?eur(v):""}</td>`;
       }
     });
-    h+=`<td class="bold">${isDisabled?"—":eur(total)}</td></tr>`;
+    h+=`<td class="bold">${isDisabled?"—":eur(total)}</td>
+      ${isCustom&&S.editMode?`<td><button onclick="removeCustomChannel(${ci})" style="border:none;background:none;color:#DC2626;cursor:pointer;font-size:14px;padding:0" title="Remove channel">×</button></td>`:""}
+    </tr>`;
   });
+
+  if(isCustom&&S.editMode){
+    var colspan=13+1; // checkbox+name+dso+9months+total+remove
+    h+=`<tr><td colspan="${colspan}" style="padding:6px 10px">
+      <button onclick="addCustomChannel()" style="padding:5px 14px;border-radius:5px;border:1px dashed #E91E8C;background:#fff;color:#E91E8C;font-size:11px;font-weight:700;cursor:pointer">+ Add channel</button>
+    </td></tr>`;
+  }
 
   h+=`<tr class="total-row">${isCustom?"<td></td>":""}
     <td>Revenue Total</td><td></td>`;
@@ -1112,7 +1268,7 @@ function buildWCTab(){
   <div class="stitle" style="margin:0">Working Capital Intelligence</div>
   <div class="scen-wrap">
     <button class="scen-btn ${!isPess&&S.scenario!=="custom"?"active":""}" onclick="setScen('budget')">Budget</button>
-    <button class="scen-btn ${isPess?"active":""}" onclick="setScen('pessimistic')">Pessimistic</button>
+    <button class="scen-btn ${isPess?"active":""}" onclick="setScen('pessimistic')">Forecast</button>
     <button class="scen-btn ${S.scenario==="custom"?"active":""}" onclick="setScen('custom')">Custom ✏️</button>
   </div>
 </div>`;
@@ -1296,6 +1452,53 @@ function draw13WeekChart(weeks){
   });
 }
 
+function drawCFChart(){
+  wch(()=>{
+    var el=document.getElementById("cfChart");if(!el)return;dstr("cf");
+    var mIdx=[3,4,5,6,7,8,9,10,11];
+    var labels=["Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    var revArr=getRevArray(), dirArr=getDirArray(), expArr=getExpArray();
+    var pers=getPers(), loan=getLoan();
+
+    // Collections: prior month revenue × 0.85 (DSO ~30d avg lag)
+    var cashIn=mIdx.map((i,j)=>Math.round(revArr[mIdx[j]-1]*0.85));
+    // Outflows: direct costs + expenses + fixed monthly
+    var cashOut=mIdx.map(i=>-(dirArr[i]+expArr[i]+pers+loan));
+    // Net per month
+    var net=mIdx.map((i,j)=>cashIn[j]+cashOut[j]);
+    // Running balance from APR1
+    var bal=APR1, balance=net.map(n=>{bal+=n;return bal;});
+
+    // Net bars: green if positive, red if negative
+    var netColors=net.map(n=>n>=0?"rgba(22,163,74,.75)":"rgba(220,38,38,.7)");
+
+    CC["cf"]=new Chart(el,{type:"bar",data:{labels,datasets:[
+      {label:"Cash In (collections)",data:cashIn,backgroundColor:"rgba(22,163,74,.55)",
+       borderColor:"rgba(22,163,74,.9)",borderWidth:1,order:2},
+      {label:"Cash Out (total)",data:cashOut,backgroundColor:"rgba(220,38,38,.55)",
+       borderColor:"rgba(220,38,38,.9)",borderWidth:1,order:2},
+      {label:"Net",data:net,backgroundColor:netColors,borderWidth:0,
+       type:"bar",order:1,barPercentage:.4,categoryPercentage:.5},
+      {label:"Bank Balance",data:balance,type:"line",borderColor:"#E91E8C",
+       backgroundColor:"rgba(233,30,140,.06)",borderWidth:2.5,pointRadius:5,
+       pointBackgroundColor:"#E91E8C",fill:true,tension:.3,order:0,yAxisID:"y1"}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      interaction:{mode:"index",intersect:false},
+      plugins:{legend:{position:"top",labels:{font:{size:11},boxWidth:12}},
+        tooltip:{callbacks:{label:ctx=>{
+          var v=ctx.raw;
+          return ctx.dataset.label+": "+(v<0?"−€":"€")+Math.abs(Math.round(v)).toLocaleString("fi-FI");
+        }}}},
+      scales:{
+        x:{grid:{display:false}},
+        y:{position:"left",ticks:{callback:v=>(v<0?"−€":"€")+Math.abs(v/1000).toFixed(0)+"K"},
+           grid:{color:"rgba(0,0,0,.05)"}},
+        y1:{position:"right",ticks:{callback:v=>(v<0?"−€":"€")+Math.abs(v/1000).toFixed(0)+"K"},
+            grid:{display:false}}
+      }}});
+  });
+}
+
 function drawChannelChart(){
   wch(()=>{
     var el=document.getElementById("chanChart");if(!el)return;dstr("chan");
@@ -1368,7 +1571,7 @@ function buildHaiku(cd,insights,gf){
 <div class="hpanel ${hOpen?"":"hidden"}" id="hPanel">
   <div class="hphdr"><span>Salama Cash AI</span><button onclick="toggleH()" style="background:none;border:none;color:#fff;cursor:pointer;font-size:16px">×</button></div>
   <div class="hpmsgs" id="hMsgs">${hMsgs.length===0
-    ?`<div class="hmsg assistant">I know your full cash position. Ask me anything:<br>· "Will we make payroll in April?"<br>· "Which customers should I call today?"<br>· "What's our cash in August?"<br>· "How does pessimistic affect YE?"</div>`
+    ?`<div class="hmsg assistant">I know your full cash position. Ask me anything:<br>· "Will we make payroll in April?"<br>· "Which customers should I call today?"<br>· "What's our cash in August?"<br>· "How does the forecast scenario affect YE?"</div>`
     :hMsgs.map(m=>`<div class="hmsg ${m.role}">${m.content.replace(/\n/g,"<br>")}</div>`).join("")}
   </div>
   <div class="hpinp"><textarea class="hptext" id="hInp" rows="2" placeholder="Ask about cash..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();hSend()}"></textarea><button class="hpsend" onclick="hSend()">Ask</button></div>
