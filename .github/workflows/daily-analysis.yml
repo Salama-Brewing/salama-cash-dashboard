@@ -1,15 +1,12 @@
 name: Daily Cash Flow Analysis
 
 on:
-  # 06:00 Helsinki (EET=UTC+2, EEST=UTC+3)
-  # Using UTC+2 (standard time) — GitHub cron is UTC
-  # 06:00 EET = 04:00 UTC  |  06:00 EEST = 03:00 UTC
-  # Safe middle: 03:00 UTC covers both (fires at 06:00 in summer EEST)
-  schedule:
-    - cron: '0 3 * * 1-5'   # 06:00 Helsinki (summer EEST = UTC+3), weekdays
-    - cron: '0 14 * * 1-5'  # 17:00 Helsinki (summer EEST = UTC+3), weekdays
+  # PAUSED — re-enable schedule when Procountor API is active
+  # schedule:
+  #   - cron: '0 3 * * 1-5'   # 06:00 Helsinki (summer EEST = UTC+3), weekdays
+  #   - cron: '0 14 * * 1-5'  # 17:00 Helsinki (summer EEST = UTC+3), weekdays
 
-  # Also allow manual trigger from GitHub Actions UI
+  # Manual trigger only (from GitHub Actions UI)
   workflow_dispatch:
     inputs:
       invoice_file:
