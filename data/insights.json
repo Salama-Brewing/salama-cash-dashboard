@@ -1,0 +1,45 @@
+{
+  "generated_at": "2026-04-09T11:19:20.523Z",
+  "model": "claude-haiku-4-5-20251001",
+  "actual_dso": {},
+  "insights": {
+    "dso_updates": {},
+    "alerts": [
+      {
+        "level": "warning",
+        "customer": null,
+        "message": "Fixed costs €62,781/month are immovable; current month budget revenue €201,863 covers ~3.2x costs but export DSO (6-8 weeks) creates cash lag. Verify April collections on schedule.",
+        "amount": 62781
+      },
+      {
+        "level": "info",
+        "customer": null,
+        "message": "Bemböle contract (€25K/mo) ends September 2026; plan for €25K monthly revenue loss and confirm renewal or replacement revenue by June.",
+        "amount": 25000
+      },
+      {
+        "level": "info",
+        "customer": null,
+        "message": "Only €3,171 open AR with zero overdue invoices suggests strong collection discipline; maintain own-channel priority (3-5 day payment terms) to accelerate cash inflow.",
+        "amount": 3171
+      }
+    ],
+    "weekly_cash_risk": "April has healthy margin (€201,863 revenue vs €62,781 fixed), but 6-8 week export DSO means cash from peak August revenue will arrive in September–October when Bemböle contract ends.",
+    "top_action": "Schedule contract renewal negotiation with Bemböle by May 31 to lock replacement revenue before Q3 cliff; simultaneously map August peak revenue collection dates to confirm September–October cash availability.",
+    "pattern_insights": [
+      "Zero overdue invoices and minimal open AR (€3,171) indicates mature collection process; 62% YoY growth is not yet creating DSO or AR creep.",
+      "Export-driven model with 6-8 week DSO creates structural seasonal cash gap: peak August revenue lands as cash in October, after Q3 fixed costs and Bemböle exit occur."
+    ],
+    "wc_note": "Working capital is tight relative to 62% growth: large revenue swings (€282K peak August vs lower months) combined with long export DSO and fixed €62,781 monthly burn require 8-week cash buffer; Bemböle loss in September accelerates this pressure."
+  },
+  "invoice_count": 1,
+  "open_count": 1,
+  "overdue_count": 0,
+  "odoo_data": {
+    "invoice_count": 1,
+    "purchase_order_total": 3009,
+    "stock_lines": 1,
+    "sales_30d_count": 1,
+    "sales_30d_total": 3884
+  }
+}
