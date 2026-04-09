@@ -870,7 +870,7 @@ async function main() {
   const prompt = buildPrompt(invoices, actualDso, odooData);
   let rawResponse;
   try {
-    rawResponse = await callClaude(args.key, prompt, 700);
+    rawResponse = await callClaude(args.key, prompt, 1500);
   } catch(e) {
     console.error('API call failed:', e.message);
     process.exit(1);
