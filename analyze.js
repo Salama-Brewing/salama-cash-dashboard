@@ -213,7 +213,21 @@ function parseXmlRpc(xmlString) {
     if (innerXml.startsWith('<array>')) {
       var dataStart = xml.indexOf('<data>', start);
       if (dataStart === -1) return null;
-      var dataEnd = xml.indexOf('</data>', dataStart);
+      // Find MATCHING </data> by counting nesting depth (nested arrays also have <data> tags)
+      var depth = 1, searchPos = dataStart + '<data>'.length, dataEnd = -1;
+      while (searchPos < xml.length) {
+        var nextOpen  = xml.indexOf('<data>',  searchPos);
+        var nextClose = xml.indexOf('</data>', searchPos);
+        if (nextClose === -1) break;
+        if (nextOpen !== -1 && nextOpen < nextClose) {
+          depth++; searchPos = nextOpen + '<data>'.length;
+        } else {
+          depth--;
+          if (depth === 0) { dataEnd = nextClose; break; }
+          searchPos = nextClose + '</data>'.length;
+        }
+      }
+      if (dataEnd === -1) return null;
       var items = [];
       var cur = dataStart + '<data>'.length;
       while (cur < dataEnd) {
@@ -230,7 +244,21 @@ function parseXmlRpc(xmlString) {
     }
     if (innerXml.startsWith('<struct>')) {
       var structStart = xml.indexOf('<struct>', start);
-      var structEnd = xml.indexOf('</struct>', structStart);
+      // Find MATCHING </struct> by counting nesting depth
+      var depth = 1, searchPos = structStart + '<struct>'.length, structEnd = -1;
+      while (searchPos < xml.length) {
+        var nextOpen  = xml.indexOf('<struct>',  searchPos);
+        var nextClose = xml.indexOf('</struct>', searchPos);
+        if (nextClose === -1) break;
+        if (nextOpen !== -1 && nextOpen < nextClose) {
+          depth++; searchPos = nextOpen + '<struct>'.length;
+        } else {
+          depth--;
+          if (depth === 0) { structEnd = nextClose; break; }
+          searchPos = nextClose + '</struct>'.length;
+        }
+      }
+      if (structEnd === -1) return null;
       var obj = {};
       var cur = structStart + '<struct>'.length;
       while (cur < structEnd) {
