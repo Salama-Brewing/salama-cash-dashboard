@@ -321,6 +321,9 @@ async function odooAuthenticate() {
   }
 }
 
+// ⚠️  READ-ONLY POLICY: This function ONLY uses 'search_read' — a read-only Odoo method.
+// Never use 'create', 'write', 'unlink', or any other mutating method here.
+// Same policy applies to Procountor when added: GET endpoints only, never POST/PUT/DELETE.
 async function fetchOdooData(uid) {
   async function searchRead(model, domain, fields, limit) {
     const xml = await xmlrpc(ODOO_URL, '/xmlrpc/2/object', 'execute_kw', [
