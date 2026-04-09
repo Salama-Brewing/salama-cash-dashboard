@@ -90,7 +90,7 @@
       "Zombie Dead Boys Milk Stout 5,5% 30l keg"
     ],
     "quantity": 1,
-    "reserved_quantity": 0,
+    "reserved_quantity": 1,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -160,7 +160,7 @@
       "[Core Range] Death Wheke NZ Wheat Ale 5,0% 440 can"
     ],
     "quantity": 71,
-    "reserved_quantity": 24,
+    "reserved_quantity": 48,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -174,7 +174,7 @@
       "[Core Range] Death Wheke NZ Wheat Ale 5,0% 30L Keg"
     ],
     "quantity": 33,
-    "reserved_quantity": 11,
+    "reserved_quantity": 12,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -188,7 +188,7 @@
       "Upside Ya Head West Coast DIPA 8,0% 20l keg"
     ],
     "quantity": 1,
-    "reserved_quantity": 0,
+    "reserved_quantity": 1,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -496,7 +496,7 @@
       "[Core Range] Firestarter NEIPA 7,0% 440 Can"
     ],
     "quantity": 432,
-    "reserved_quantity": 144,
+    "reserved_quantity": 168,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -552,7 +552,7 @@
       "HAGSTRÖM THUNDER Imp. Stout 11,5% 20l keg"
     ],
     "quantity": 37,
-    "reserved_quantity": 1,
+    "reserved_quantity": 2,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -566,7 +566,7 @@
       "HAGSTRÖM THUNDER Imp. Stout 11,5% Can 440"
     ],
     "quantity": 240,
-    "reserved_quantity": 72,
+    "reserved_quantity": 144,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -580,7 +580,7 @@
       "[Core Range] Magic Gloves NEPA 5,3% 440 Can (copy)"
     ],
     "quantity": 360,
-    "reserved_quantity": 24,
+    "reserved_quantity": 48,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -636,7 +636,7 @@
       "Aussie Barbie Death West Coast IPA 6.5% 30L Keg"
     ],
     "quantity": 3,
-    "reserved_quantity": 2,
+    "reserved_quantity": 3,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1056,7 +1056,7 @@
       "[Core Range] Neon Beast NEIPA 6,0% 440 Can\n"
     ],
     "quantity": 1392,
-    "reserved_quantity": 1008,
+    "reserved_quantity": 1056,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1070,7 +1070,7 @@
       "[Core Range] Neon Beast NEIPA 6,0% 30L Keg"
     ],
     "quantity": 19,
-    "reserved_quantity": 4,
+    "reserved_quantity": 5,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1126,7 +1126,7 @@
       "[Core Range] Neon Baby NEPA 5,5% 30L Keg"
     ],
     "quantity": 18,
-    "reserved_quantity": 8,
+    "reserved_quantity": 9,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1140,7 +1140,7 @@
       "[Core Range] Neon Baby NEPA 5,5% 440 Can"
     ],
     "quantity": 1152,
-    "reserved_quantity": 984,
+    "reserved_quantity": 1032,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1210,7 +1210,7 @@
       "[Core Range] Octoshock Sour 4,5% 30l keg"
     ],
     "quantity": 43,
-    "reserved_quantity": 2,
+    "reserved_quantity": 3,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1224,7 +1224,7 @@
       "[Core Range] Octoshock Sour 4,5% 440 can"
     ],
     "quantity": 3936,
-    "reserved_quantity": 627,
+    "reserved_quantity": 651,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1252,7 +1252,7 @@
       "Big Nelson NEIPA 6.5% 440 can"
     ],
     "quantity": 264,
-    "reserved_quantity": 96,
+    "reserved_quantity": 144,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1266,7 +1266,7 @@
       "Decapitation NEIPA 6,7% Can 440"
     ],
     "quantity": 2688,
-    "reserved_quantity": 768,
+    "reserved_quantity": 840,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1294,7 +1294,7 @@
       "Decapitation NEIPA 6,7% Keg 30l"
     ],
     "quantity": 23,
-    "reserved_quantity": 8,
+    "reserved_quantity": 9,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1322,7 +1322,7 @@
       "[Core Range] Brainzilla Helles 4,8% 440 Can"
     ],
     "quantity": 2160,
-    "reserved_quantity": 1200,
+    "reserved_quantity": 1224,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1378,7 +1378,7 @@
       "[Core Range] Neo-Elektro NEIPA 6,5% 440 Can"
     ],
     "quantity": 5136,
-    "reserved_quantity": 3528,
+    "reserved_quantity": 3552,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1462,7 +1462,7 @@
       "[Core Range] Passion Razzie Fruited Sour 6,2% 440 Can"
     ],
     "quantity": 3384,
-    "reserved_quantity": 264,
+    "reserved_quantity": 288,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1490,7 +1490,7 @@
       "[Core Range] La-La Land American Pale Ale 5,2% 440 can (copy)"
     ],
     "quantity": 576,
-    "reserved_quantity": 24,
+    "reserved_quantity": 48,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
