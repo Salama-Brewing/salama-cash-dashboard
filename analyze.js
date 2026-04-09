@@ -413,7 +413,10 @@ function buildPrompt(invoices, actualDso, odooData) {
     .map(([c, d]) => `  ${c}: actual ${d.actual_avg}d vs baseline ${d.baseline}d (${d.delta >= 0 ? '+' : ''}${d.delta}d, n=${d.sample_size}, trend: ${d.trend})`)
     .join('\n') || '  No payment history yet — using baselines only';
 
+  // Top 10 overdue by amount — avoids bloating the prompt with 50+ lines
   const overdueLines = overdue
+    .sort((a,b) => b.amount - a.amount)
+    .slice(0, 10)
     .map(i => `  #${i.id || '?'} ${i.customer} €${Math.round(i.amount).toLocaleString()} due ${i.dueDate}`)
     .join('\n') || '  None';
 
@@ -870,7 +873,7 @@ async function main() {
   const prompt = buildPrompt(invoices, actualDso, odooData);
   let rawResponse;
   try {
-    rawResponse = await callClaude(args.key, prompt, 1500);
+    rawResponse = await callClaude(args.key, prompt, 2000);
   } catch(e) {
     console.error('API call failed:', e.message);
     process.exit(1);
