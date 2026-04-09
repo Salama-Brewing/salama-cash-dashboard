@@ -873,10 +873,11 @@ async function main() {
     process.exit(1);
   }
 
-  // Parse response
+  // Parse response — strip markdown code fences if present
   let insights;
   try {
-    insights = JSON.parse(rawResponse);
+    const cleaned = rawResponse.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+    insights = JSON.parse(cleaned);
   } catch(_) {
     const match = rawResponse.match(/\{[\s\S]*\}/);
     if (match) {
@@ -936,7 +937,8 @@ async function main() {
   let briefings = null;
   if (briefingRaw) {
     try {
-      briefings = JSON.parse(briefingRaw);
+      const cleaned = briefingRaw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+      briefings = JSON.parse(cleaned);
     } catch(_) {
       const match = briefingRaw.match(/\{[\s\S]*\}/);
       if (match) try { briefings = JSON.parse(match[0]); } catch(e2) { console.warn('Could not parse briefings JSON'); }
