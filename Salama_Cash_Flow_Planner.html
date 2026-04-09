@@ -166,6 +166,8 @@ var cashData=null, CC={}, hOpen=false, hMsgs=[];
   fetch('data/insights.json').then(r=>r.ok?r.json():Promise.reject()).then(d=>{window.__insights=d;}).catch(()=>{});
   // Load role briefings if available
   fetch('data/briefings.json').then(r=>r.ok?r.json():Promise.reject()).then(d=>{window.__briefings=d;}).catch(()=>{});
+  // Load Odoo inventory if available
+  fetch('data/odoo_inventory.json').then(r=>r.ok?r.json():Promise.reject()).then(d=>{window.__odooInventory=d;}).catch(()=>{});
   var D={meta:{mode:"demo"},bank:{balance:-5200,balance_date:"2026-03-25"},
     receivables:{total_open:214900,invoice_count:25,
       aging:{"0_30":197500,"31_60":14200,"61_90":3200,"90_plus":0},
@@ -482,7 +484,7 @@ function statusBadge(s){return`<span class="badge ${s==="OVERDUE"?"b-red":s==="P
 // ════════════════════════════════════════════════════════════
 // STATE
 // ════════════════════════════════════════════════════════════
-var S={tab:"today",scenario:"budget",editMode:false,briefingRole:"ceo",briefingView:"daily",
+var S={tab:"today",scenario:"budget",editMode:false,briefingRole:"ceo",briefingView:"daily",briefingHorizon:"7day",
   levers:{barsAndPubsDso:41,otherExportDso:52,supplierDpo:22,invDays:42},
   customChannels:null,customDir:null,customExp:null,customPers:47425,customLoan:15356,
   // Saved forecast (populated when user clicks "Save as Forecast" from Custom)
@@ -490,6 +492,7 @@ var S={tab:"today",scenario:"budget",editMode:false,briefingRole:"ceo",briefingV
 
 function setBriefingRole(r){S.briefingRole=r;render();}
 function setBriefingView(v){S.briefingView=v;render();}
+function setBriefingHorizon(h){S.briefingHorizon=h;render();}
 
 function getDismissed(){try{return JSON.parse(localStorage.getItem('sb_dismissed')||'[]');}catch(_){return[];}}
 function dismissAction(id){var d=getDismissed();if(!d.includes(id)){d.push(id);localStorage.setItem('sb_dismissed',JSON.stringify(d));render();}}
@@ -707,6 +710,7 @@ function render(){
     <button class="tab ${S.tab==="customers"?"active":""}" onclick="setTab('customers')">Customers & Suppliers</button>
     <button class="tab ${S.tab==="budget"?"active":""}" onclick="setTab('budget')">Budget Breakdown</button>
     <button class="tab ${S.tab==="wc"?"active":""}" onclick="setTab('wc')">Working Capital</button>
+    <button class="tab ${S.tab==="inventory"?"active":""}" onclick="setTab('inventory')">📦 Inventory</button>
   </div>
 </div>
 <div class="content">`;
@@ -741,9 +745,15 @@ function render(){
     html+=buildWCTab();
   }
 
+  // ── INVENTORY ─────────────────────────────────────────────
+  if(S.tab==="inventory"){
+    html+=buildInventoryTab();
+    // No chart needed for inventory tab
+  }
+
   html+=`</div>`;
   html+=buildHaiku(cd,insights,gf);
-  html+=`<div class="footer">Salama Brewing Company Oy · Procountor live sync (06:00 UTC weekdays) · LivePlan export 23 Mar 2026 · AI predictions: customer DSO × seasonal × growth factor ${gf.toFixed(2)}</div>`;
+  html+=`<div class="footer">Salama Brewing Company Oy · Odoo live inventory · Procountor (pending API activation) · LivePlan export 23 Mar 2026 · AI briefings: 06:00 &amp; 17:00 Helsinki</div>`;
 
   document.getElementById("app").innerHTML=html;
 
@@ -752,6 +762,7 @@ function render(){
   if(S.tab==="forecast"){var w13=build13Week(cd,S.scenario);draw13WeekChart(w13);}
   if(S.tab==="budget"){drawCFChart();drawChannelChart();}
   if(S.tab==="wc"){drawCCCChart();drawWCChart();}
+  // No chart needed for inventory tab
 }
 
 // ════════════════════════════════════════════════════════════
@@ -765,26 +776,34 @@ function buildTodayTab(days7,insights,tonightBal,lowestThisWeek,lowestDay,gf,cd)
   // ── Briefing section (top — single source of truth for actions) ──────────
   var roles=[
     {id:"ceo",label:"CEO / CFO"},{id:"sales",label:"Sales"},
-    {id:"production",label:"Production"},{id:"marketing",label:"Marketing"},
-    {id:"weekly",label:"📅 Weekly"}
+    {id:"production",label:"Production"},{id:"marketing",label:"Marketing"}
   ];
   var roleTabs=roles.map(r=>`<button class="role-btn ${S.briefingRole===r.id?"active":""}" onclick="setBriefingRole('${r.id}')">${r.label}</button>`).join("");
 
+  // Horizon tabs
+  var horizonTabs=`<div style="display:flex;gap:4px;margin-bottom:10px">
+    <button class="scen-btn ${S.briefingHorizon==='7day'?'active':''}" onclick="setBriefingHorizon('7day')">📅 7-Day</button>
+    <button class="scen-btn ${S.briefingHorizon==='monthly'?'active':''}" onclick="setBriefingHorizon('monthly')">📆 Monthly</button>
+    <button class="scen-btn ${S.briefingHorizon==='13week'?'active':''}" onclick="setBriefingHorizon('13week')">📊 13-Week</button>
+    <button class="scen-btn ${S.briefingHorizon==='weekly'?'active':''}" onclick="setBriefingHorizon('weekly')">🗓 Weekly</button>
+  </div>`;
+
   if(b&&b.roles){
-    var runType=b.run_type==="morning"?"Morning":"Evening";
+    var runTypeLabel=b.run_type==="morning"?"Morning":b.run_type==="weekly"?"Weekly":"Evening";
     var genDate=b.generated_at?new Date(b.generated_at):new Date();
     var timeStr=genDate.toLocaleTimeString("fi-FI",{hour:"2-digit",minute:"2-digit"});
-    // Briefing header (shared across all role views)
+    // Briefing header
     h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
       <div>
-        <div class="stitle" style="margin:0">📋 ${runType} Briefing</div>
+        <div class="stitle" style="margin:0">📋 ${runTypeLabel} Briefing</div>
         <div class="brief-meta">Generated ${timeStr} · AI-powered · ${b.unclosed_count>0?`<span style="color:#D97706;font-weight:600">${b.unclosed_count} not followed up</span>`:"All previous actions closed"}</div>
       </div>
       <div class="role-tabs" style="margin:0">${roleTabs}</div>
     </div>`;
+    h+=horizonTabs;
 
-    // ── WEEKLY VIEW ────────────────────────────────────────────────────────
-    if(S.briefingRole==="weekly"){
+    // ── WEEKLY HORIZON ─────────────────────────────────────────────────────
+    if(S.briefingHorizon==="weekly"){
       var w=b.weekly;
       if(w){
         var trendIcon=w.trend==="improving"?"📈":w.trend==="worsening"?"📉":"➡️";
@@ -812,12 +831,14 @@ function buildTodayTab(days7,insights,tonightBal,lowestThisWeek,lowestDay,gf,cd)
         </div>`;
       }
 
-    // ── DAILY ROLE VIEW ────────────────────────────────────────────────────
+    // ── 7-DAY / MONTHLY / 13-WEEK HORIZON ─────────────────────────────────
     } else {
-      var rd=(b.roles||{})[S.briefingRole]||b.roles.ceo;
+      var roleData=(b.roles||{})[S.briefingRole]||b.roles.ceo||{};
+      // Support both new format (role has horizon keys) and old flat format
+      var rd=roleData[S.briefingHorizon]||roleData["7day"]||roleData||{};
       var status=rd.status||"amber";
 
-      // Unclosed (cross-role, shown on daily views only)
+      // Unclosed (cross-role)
       var unclosedAll=(b.unclosed||[]).filter(a=>!dismissed.includes(a.id));
       var unclosedBox="";
       if(unclosedAll.length>0){
@@ -832,16 +853,6 @@ function buildTodayTab(days7,insights,tonightBal,lowestThisWeek,lowestDay,gf,cd)
       }
       h+=unclosedBox;
 
-      // CEO financial KPIs
-      var kpiRow="";
-      if(S.briefingRole==="ceo"&&(rd.cash_position||rd.ar_summary||rd.runway)){
-        kpiRow=`<div class="brief-kpi-row">${[
-          rd.cash_position?{l:"Cash Position",v:rd.cash_position}:null,
-          rd.ar_summary?{l:"AR Overview",v:rd.ar_summary}:null,
-          rd.runway?{l:"Runway",v:rd.runway}:null
-        ].filter(Boolean).map(k=>`<div class="brief-kpi"><div class="brief-kpi-lbl">${k.l}</div><div class="brief-kpi-val" style="font-size:11px;font-weight:600;color:#374151">${k.v}</div></div>`).join("")}</div>`;
-      }
-
       var actionsHtml=(rd.actions||[]).filter(a=>!dismissed.includes(a.id)).map((a,i)=>`
         <div class="brief-action ${a.urgent?"urgent":""}">
           <div class="brief-action-num ${a.urgent?"urgent":""}">${i+1}</div>
@@ -849,6 +860,39 @@ function buildTodayTab(days7,insights,tonightBal,lowestThisWeek,lowestDay,gf,cd)
           ${a.urgent?`<span class="badge b-red" style="flex-shrink:0">Urgent</span>`:""}
           <button class="unclosed-dismiss" onclick="dismissAction('${a.id}')" title="Mark done">✓</button>
         </div>`).join("")||`<p style="font-size:12px;color:#6B7280;padding:8px 0">No actions — all clear</p>`;
+
+      // 7-day cash flow summary
+      var cashFlowSummary="";
+      if(S.briefingHorizon==="7day"&&(rd.cash_in_7d||rd.cash_out_7d)){
+        cashFlowSummary=`<div class="brief-kpi-row" style="margin-bottom:8px">
+          <div class="brief-kpi"><div class="brief-kpi-lbl">Expected Cash In (7d)</div><div class="brief-kpi-val txt-grn">${eur(rd.cash_in_7d||0)}</div></div>
+          <div class="brief-kpi"><div class="brief-kpi-lbl">Expected Cash Out (7d)</div><div class="brief-kpi-val txt-red">${eur(rd.cash_out_7d||0)}</div></div>
+          <div class="brief-kpi"><div class="brief-kpi-lbl">Net This Week</div><div class="brief-kpi-val ${(rd.cash_in_7d||0)-(rd.cash_out_7d||0)>=0?'txt-grn':'txt-red'}">${eur((rd.cash_in_7d||0)-(rd.cash_out_7d||0))}</div></div>
+        </div>`;
+      }
+
+      // CEO financial KPIs (flat format fallback)
+      var kpiRow="";
+      if(S.briefingRole==="ceo"&&S.briefingHorizon==="7day"&&(rd.cash_position||rd.ar_summary||rd.runway)){
+        kpiRow=`<div class="brief-kpi-row">${[
+          rd.cash_position?{l:"Cash Position",v:rd.cash_position}:null,
+          rd.ar_summary?{l:"AR Overview",v:rd.ar_summary}:null,
+          rd.runway?{l:"Runway",v:rd.runway}:null
+        ].filter(Boolean).map(k=>`<div class="brief-kpi"><div class="brief-kpi-lbl">${k.l}</div><div class="brief-kpi-val" style="font-size:11px;font-weight:600;color:#374151">${k.v}</div></div>`).join("")}</div>`;
+      }
+
+      // Monthly KPIs
+      var monthlyKpis="";
+      if(S.briefingHorizon==="monthly"&&rd.kpis){
+        var kv=rd.kpis;
+        monthlyKpis=`<div class="brief-kpi-row">${Object.entries(kv).map(([k,v])=>`<div class="brief-kpi"><div class="brief-kpi-lbl">${k.replace(/_/g,' ')}</div><div class="brief-kpi-val" style="font-size:12px;font-weight:700;color:#374151">${v}</div></div>`).join("")}</div>`;
+      }
+
+      // 13-week risks
+      var risksHtml="";
+      if(S.briefingHorizon==="13week"&&rd.risks&&rd.risks.length){
+        risksHtml=`<div class="brief-section-title">Key Risks</div>${rd.risks.map(r=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:12px;color:#374151;border-bottom:1px solid #F3F4F6"><span style="color:#DC2626;flex-shrink:0">⚠</span><span>${r}</span></div>`).join("")}`;
+      }
 
       h+=`<div class="brief-status ${status}">
         <div class="brief-dot ${status}"></div>
@@ -858,10 +902,13 @@ function buildTodayTab(days7,insights,tonightBal,lowestThisWeek,lowestDay,gf,cd)
         </div>
       </div>
       <div class="card" style="margin-bottom:10px">
+        ${cashFlowSummary}
         ${kpiRow}
+        ${monthlyKpis}
         ${rd.narrative?`<div class="brief-narrative" style="margin-bottom:8px">${rd.narrative}</div>`:""}
         ${rd.focus?`<div class="brief-focus" style="margin-bottom:10px">${rd.focus}</div>`:""}
-        <div class="brief-section-title">Actions</div>
+        ${risksHtml}
+        <div class="brief-section-title" style="margin-top:${risksHtml?"10":"0"}px">Actions</div>
         ${actionsHtml}
       </div>`;
     }
@@ -878,6 +925,7 @@ function buildTodayTab(days7,insights,tonightBal,lowestThisWeek,lowestDay,gf,cd)
       :`✓ All AR within normal patterns.`;
     h+=`<div class="alert ${alertCls}">${alertTxt}</div>`;
     h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px"><div class="stitle" style="margin:0">Actions Required Today</div><div class="role-tabs" style="margin:0">${roleTabs}</div></div>`;
+    h+=horizonTabs;
     h+=`<div class="card" style="margin-bottom:10px">`;
     if(insights.actions.length===0){
       h+=`<div class="action-item ai-ok"><div class="ai-icon">✓</div><div class="ai-body"><div class="ai-title">No actions needed</div><div class="ai-desc">All invoices within expected payment patterns.</div></div></div>`;
@@ -1562,6 +1610,115 @@ function buildWCTab(){
 <div class="note">Materials ordered ~6 weeks before production month. First cash in = month start + weighted customer DSO (seasonal adjusted). CCC = total days capital is deployed per euro of revenue. August: malt/hops ordered in mid-June, cash collected from export customers in October — a 4-month cycle at peak volume.</div>
 </div>`;
 
+  return h;
+}
+
+// ════════════════════════════════════════════════════════════
+// TAB: INVENTORY
+// ════════════════════════════════════════════════════════════
+function buildInventoryTab(){
+  var inv = window.__odooInventory || [];
+  var h = "";
+
+  // Header
+  h += `<div class="stitle" style="margin-bottom:10px">📦 Live Inventory — Odoo</div>`;
+
+  if(inv.length === 0){
+    // No data state
+    h += `<div class="card" style="text-align:center;padding:48px;color:#9CA3AF">
+      <div style="font-size:32px;margin-bottom:8px">📦</div>
+      <div style="font-weight:700;color:#374151;margin-bottom:4px">Inventory data not loaded</div>
+      <div style="font-size:12px">Run <code>ODOO_KEY=... node analyze.js</code> to pull live inventory from Odoo.</div>
+    </div>`;
+    return h;
+  }
+
+  // Separate raw materials vs finished goods
+  var rawMaterials = inv.filter(i => {
+    var loc = (i.location_id && i.location_id[1]) || "";
+    return loc.toLowerCase().includes("raaka") || loc.toLowerCase().includes("bem/raaka");
+  });
+  var finishedGoods = inv.filter(i => {
+    var loc = (i.location_id && i.location_id[1]) || "";
+    return loc.toLowerCase().includes("klo") || loc.toLowerCase().includes("klondyke") || loc.toLowerCase().includes("tax-free");
+  });
+  var otherStock = inv.filter(i => !rawMaterials.includes(i) && !finishedGoods.includes(i));
+
+  // KPI row
+  var totalValue = inv.reduce((s,i) => s + (parseFloat(i.value)||0), 0);
+  var rawValue = rawMaterials.reduce((s,i) => s + (parseFloat(i.value)||0), 0);
+  var fgValue = finishedGoods.reduce((s,i) => s + (parseFloat(i.value)||0), 0);
+
+  h += `<div class="g3">
+    <div class="card"><div class="kpi-lbl">Total Inventory Value</div><div class="kpi-val">${eur(totalValue)}</div><div class="kpi-sub">${inv.length} stock lines</div></div>
+    <div class="card"><div class="kpi-lbl">Raw Materials</div><div class="kpi-val">${eur(rawValue)}</div><div class="kpi-sub">${rawMaterials.length} items · Bemböle</div></div>
+    <div class="card"><div class="kpi-lbl">Finished Goods</div><div class="kpi-val">${eur(fgValue)}</div><div class="kpi-sub">${finishedGoods.length} lines · Klondyke</div></div>
+  </div>`;
+
+  // Raw materials table
+  if(rawMaterials.length > 0){
+    h += `<div class="card"><div class="stitle">Raw Materials — Bemböle</div>
+    <div style="overflow-x:auto"><table>
+    <thead><tr><th>Product</th><th>Location</th><th>On Hand</th><th>Reserved</th><th>Available</th><th>Value</th></tr></thead><tbody>`;
+    rawMaterials.sort((a,b)=>(parseFloat(b.value)||0)-(parseFloat(a.value)||0)).forEach(item=>{
+      var name = (item.product_id && item.product_id[1]) || "Unknown";
+      var loc = (item.location_id && item.location_id[1]) || "";
+      var qty = parseFloat(item.quantity)||0;
+      var res = parseFloat(item.reserved_quantity)||0;
+      var avail = qty - res;
+      var val = parseFloat(item.value)||0;
+      var availCls = avail <= 0 ? "txt-red" : avail < qty*0.2 ? "txt-amb" : "txt-grn";
+      h += `<tr>
+        <td>${name}</td>
+        <td style="color:#9CA3AF;font-size:11px">${loc.split("/").pop()}</td>
+        <td>${qty.toFixed(2)}</td>
+        <td style="color:#9CA3AF">${res > 0 ? res.toFixed(2) : "—"}</td>
+        <td class="${availCls} bold">${avail.toFixed(2)}</td>
+        <td>${val > 0 ? eur(val) : "—"}</td>
+      </tr>`;
+    });
+    h += `</tbody></table></div></div>`;
+  }
+
+  // Finished goods table
+  if(finishedGoods.length > 0){
+    h += `<div class="card"><div class="stitle">Finished Goods — Klondyke / Tax-Free Warehouse</div>
+    <div style="overflow-x:auto"><table>
+    <thead><tr><th>Product</th><th>Location</th><th>On Hand</th><th>Reserved</th><th>Available</th></tr></thead><tbody>`;
+    finishedGoods.sort((a,b)=>(parseFloat(b.quantity)||0)-(parseFloat(a.quantity)||0)).forEach(item=>{
+      var name = (item.product_id && item.product_id[1]) || "Unknown";
+      var loc = (item.location_id && item.location_id[1]) || "";
+      var qty = parseFloat(item.quantity)||0;
+      var res = parseFloat(item.reserved_quantity)||0;
+      var avail = qty - res;
+      var availCls = avail <= 0 ? "txt-red" : avail < 5 ? "txt-amb" : "";
+      h += `<tr>
+        <td>${name}</td>
+        <td style="color:#9CA3AF;font-size:11px">${loc.split("/").pop()}</td>
+        <td>${qty.toFixed(0)}</td>
+        <td style="color:#9CA3AF">${res > 0 ? res.toFixed(0) : "—"}</td>
+        <td class="${availCls} bold">${avail.toFixed(0)}</td>
+      </tr>`;
+    });
+    h += `</tbody></table></div></div>`;
+  }
+
+  // Other stock
+  if(otherStock.length > 0){
+    h += `<div class="card"><div class="stitle">Other Stock Locations (${otherStock.length} lines)</div>
+    <div style="overflow-x:auto"><table>
+    <thead><tr><th>Product</th><th>Location</th><th>On Hand</th><th>Value</th></tr></thead><tbody>`;
+    otherStock.forEach(item=>{
+      var name = (item.product_id && item.product_id[1]) || "Unknown";
+      var loc = (item.location_id && item.location_id[1]) || "";
+      var qty = parseFloat(item.quantity)||0;
+      var val = parseFloat(item.value)||0;
+      h += `<tr><td>${name}</td><td style="color:#9CA3AF;font-size:11px">${loc}</td><td>${qty.toFixed(2)}</td><td>${val>0?eur(val):"—"}</td></tr>`;
+    });
+    h += `</tbody></table></div></div>`;
+  }
+
+  h += `<div class="note">Live data from Odoo · Bemböle production facility · Klondyke tax-free warehouse · Updated by daily analyze.js run</div>`;
   return h;
 }
 

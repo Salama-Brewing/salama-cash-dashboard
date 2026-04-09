@@ -27,8 +27,15 @@ const path = require('path');
 const MODEL           = 'claude-haiku-4-5-20251001';
 const OUTPUT          = path.join(__dirname, 'data', 'insights.json');
 const BRIEFINGS_OUT   = path.join(__dirname, 'data', 'briefings.json');
+const ODOO_INV_OUT    = path.join(__dirname, 'data', 'odoo_inventory.json');
 const ACTION_LOG_PATH = path.join(__dirname, 'data', 'action_log.json');
 const TODAY           = new Date();
+
+// ─── ODOO CONFIG ───────────────────────────────────────────────────────────
+const ODOO_URL  = process.env.ODOO_URL  || 'salama.avoin.app';
+const ODOO_DB   = process.env.ODOO_DB   || 'salama.avoin.app';
+const ODOO_USER = process.env.ODOO_USER || 'christian@salamabrewing.com';
+const ODOO_KEY  = process.env.ODOO_KEY  || '';
 
 // Baseline DSO profiles — must match dashboard PROFILES object
 const DSO_BASELINES = {
@@ -117,6 +124,223 @@ function parseCSV(filePath) {
   }).filter(r => r.customer && r.amount > 0);
 }
 
+// ─── ODOO XML-RPC HELPERS ──────────────────────────────────────────────────
+function xmlrpc(host, urlPath, method, params) {
+  return new Promise((resolve, reject) => {
+    // Build XML-RPC request body
+    function encodeValue(v) {
+      if (v === null || v === undefined) return '<value><boolean>0</boolean></value>';
+      if (typeof v === 'boolean') return `<value><boolean>${v ? 1 : 0}</boolean></value>`;
+      if (typeof v === 'number' && Number.isInteger(v)) return `<value><int>${v}</int></value>`;
+      if (typeof v === 'number') return `<value><double>${v}</double></value>`;
+      if (typeof v === 'string') return `<value><string>${v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</string></value>`;
+      if (Array.isArray(v)) {
+        return `<value><array><data>${v.map(encodeValue).join('')}</data></array></value>`;
+      }
+      if (typeof v === 'object') {
+        const members = Object.entries(v).map(([k, val]) =>
+          `<member><name>${k}</name>${encodeValue(val)}</member>`
+        ).join('');
+        return `<value><struct>${members}</struct></value>`;
+      }
+      return `<value><string>${String(v)}</string></value>`;
+    }
+
+    const paramsXml = params.map(encodeValue).map(v => `<param>${v}</param>`).join('');
+    const body = `<?xml version="1.0"?><methodCall><methodName>${method}</methodName><params>${paramsXml}</params></methodCall>`;
+
+    const req = https.request({
+      hostname: host,
+      path: urlPath,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/xml',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    }, res => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => resolve(data));
+    });
+    req.on('error', reject);
+    req.setTimeout(15000, () => { req.destroy(new Error('Odoo XML-RPC timeout')); });
+    req.write(body);
+    req.end();
+  });
+}
+
+function parseXmlRpc(xmlString) {
+  // Extract text content between tags
+  function between(s, open, close, from) {
+    var start = s.indexOf(open, from || 0);
+    if (start === -1) return null;
+    start += open.length;
+    var end = s.indexOf(close, start);
+    if (end === -1) return null;
+    return { text: s.slice(start, end), end: end + close.length };
+  }
+
+  function parseValue(xml, pos) {
+    pos = pos || 0;
+    var start = xml.indexOf('<value>', pos);
+    if (start === -1) return null;
+    var inner = xml.indexOf('>', start) + 1;
+    var innerXml = xml.slice(inner);
+
+    if (innerXml.startsWith('<int>') || innerXml.startsWith('<i4>')) {
+      var tag = innerXml.startsWith('<int>') ? 'int' : 'i4';
+      var r = between(xml, `<${tag}>`, `</${tag}>`, start);
+      return r ? { value: parseInt(r.text, 10), end: r.end } : null;
+    }
+    if (innerXml.startsWith('<double>')) {
+      var r = between(xml, '<double>', '</double>', start);
+      return r ? { value: parseFloat(r.text), end: r.end } : null;
+    }
+    if (innerXml.startsWith('<boolean>')) {
+      var r = between(xml, '<boolean>', '</boolean>', start);
+      return r ? { value: r.text.trim() === '1', end: r.end } : null;
+    }
+    if (innerXml.startsWith('<string>') || innerXml.startsWith('\n') || innerXml.match(/^[^<]/)) {
+      // String (explicit or implicit)
+      if (innerXml.startsWith('<string>')) {
+        var r = between(xml, '<string>', '</string>', start);
+        return r ? { value: r.text.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>'), end: r.end } : null;
+      }
+      // Implicit string — text directly between <value> and </value>
+      var r = between(xml, '<value>', '</value>', start);
+      return r ? { value: r.text.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>'), end: r.end } : null;
+    }
+    if (innerXml.startsWith('<array>')) {
+      var dataStart = xml.indexOf('<data>', start);
+      if (dataStart === -1) return null;
+      var dataEnd = xml.indexOf('</data>', dataStart);
+      var items = [];
+      var cur = dataStart + '<data>'.length;
+      while (cur < dataEnd) {
+        var vStart = xml.indexOf('<value>', cur);
+        if (vStart === -1 || vStart >= dataEnd) break;
+        var item = parseValue(xml, vStart);
+        if (!item) break;
+        items.push(item.value);
+        cur = item.end;
+      }
+      var arrEnd = xml.indexOf('</array>', dataEnd) + '</array>'.length;
+      var valEnd = xml.indexOf('</value>', arrEnd) + '</value>'.length;
+      return { value: items, end: valEnd };
+    }
+    if (innerXml.startsWith('<struct>')) {
+      var structStart = xml.indexOf('<struct>', start);
+      var structEnd = xml.indexOf('</struct>', structStart);
+      var obj = {};
+      var cur = structStart + '<struct>'.length;
+      while (cur < structEnd) {
+        var mStart = xml.indexOf('<member>', cur);
+        if (mStart === -1 || mStart >= structEnd) break;
+        var nameR = between(xml, '<name>', '</name>', mStart);
+        if (!nameR) break;
+        var valR = parseValue(xml, xml.indexOf('<value>', nameR.end));
+        if (!valR) break;
+        obj[nameR.text] = valR.value;
+        cur = xml.indexOf('</member>', valR.end) + '</member>'.length;
+      }
+      var sValEnd = xml.indexOf('</value>', structEnd) + '</value>'.length;
+      return { value: obj, end: sValEnd };
+    }
+    // Fallback: implicit string
+    var r = between(xml, '<value>', '</value>', start);
+    return r ? { value: r.text, end: r.end } : null;
+  }
+
+  try {
+    // Check for fault
+    if (xmlString.includes('<fault>')) {
+      var faultVal = parseValue(xmlString, xmlString.indexOf('<fault>'));
+      throw new Error('XML-RPC fault: ' + JSON.stringify(faultVal ? faultVal.value : 'unknown'));
+    }
+    var paramsStart = xmlString.indexOf('<params>');
+    if (paramsStart === -1) return null;
+    var paramStart = xmlString.indexOf('<param>', paramsStart);
+    if (paramStart === -1) return null;
+    var result = parseValue(xmlString, xmlString.indexOf('<value>', paramStart));
+    return result ? result.value : null;
+  } catch (e) {
+    throw e;
+  }
+}
+
+function dateNDaysAgo(n) {
+  var d = new Date(TODAY);
+  d.setDate(d.getDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+
+async function odooAuthenticate() {
+  if (!ODOO_KEY) return null;
+  try {
+    const xml = await xmlrpc(ODOO_URL, '/xmlrpc/2/common', 'authenticate', [
+      ODOO_DB, ODOO_USER, ODOO_KEY, {}
+    ]);
+    const uid = parseXmlRpc(xml);
+    if (typeof uid === 'number' && uid > 0) {
+      console.log(`  Odoo auth OK — uid: ${uid}`);
+      return uid;
+    }
+    console.warn('  Odoo auth returned non-integer uid:', uid);
+    return null;
+  } catch (e) {
+    console.warn('  Odoo auth failed:', e.message);
+    return null;
+  }
+}
+
+async function fetchOdooData(uid) {
+  async function searchRead(model, domain, fields, limit) {
+    const xml = await xmlrpc(ODOO_URL, '/xmlrpc/2/object', 'execute_kw', [
+      ODOO_DB, uid, ODOO_KEY,
+      model, 'search_read',
+      [domain],
+      { fields, limit }
+    ]);
+    const result = parseXmlRpc(xml);
+    return Array.isArray(result) ? result : [];
+  }
+
+  console.log('  Fetching open invoices (account.move)...');
+  const invoices = await searchRead(
+    'account.move',
+    [['move_type','=','out_invoice'],['state','=','posted'],['payment_state','in',['not_paid','partial']]],
+    ['name','partner_id','amount_residual','invoice_date_due','invoice_date','payment_state'],
+    200
+  );
+
+  console.log(`  Fetching purchase orders...`);
+  const purchase_orders = await searchRead(
+    'purchase.order',
+    [['state','in',['purchase','draft','sent']]],
+    ['name','partner_id','amount_total','date_planned','state'],
+    100
+  );
+
+  console.log(`  Fetching stock quants...`);
+  const stock = await searchRead(
+    'stock.quant',
+    [['location_id.usage','=','internal'],['quantity','>',0]],
+    ['product_id','quantity','reserved_quantity','location_id','value'],
+    200
+  );
+
+  console.log(`  Fetching recent sales orders...`);
+  const sales_pipeline = await searchRead(
+    'sale.order',
+    [['state','in',['sale']],['date_order','>=',dateNDaysAgo(30)]],
+    ['name','partner_id','amount_total','date_order'],
+    50
+  );
+
+  console.log(`  Odoo: ${invoices.length} invoices, ${purchase_orders.length} POs, ${stock.length} stock lines, ${sales_pipeline.length} recent sales`);
+  return { invoices, purchase_orders, stock, sales_pipeline };
+}
+
 // ─── ACTUAL DSO COMPUTATION ─────────────────────────────────────────────────
 function computeActualDso(invoices) {
   const byCustomer = {};
@@ -146,7 +370,7 @@ function computeActualDso(invoices) {
 }
 
 // ─── CLAUDE PROMPT ─────────────────────────────────────────────────────────
-function buildPrompt(invoices, actualDso) {
+function buildPrompt(invoices, actualDso, odooData) {
   const open          = invoices.filter(i => i.status !== 'PAID');
   const overdue       = open.filter(i => i.status === 'OVERDUE' || new Date(i.dueDate) < TODAY);
   const totalOpen     = open.reduce((s, i) => s + i.amount, 0);
@@ -162,12 +386,24 @@ function buildPrompt(invoices, actualDso) {
     .map(i => `  #${i.id || '?'} ${i.customer} €${Math.round(i.amount).toLocaleString()} due ${i.dueDate}`)
     .join('\n') || '  None';
 
+  // Odoo supplementary context
+  let odooCtx = '';
+  if (odooData) {
+    const poTotal = odooData.purchase_orders.reduce((s, p) => s + (parseFloat(p.amount_total) || 0), 0);
+    const sales30dTotal = odooData.sales_pipeline.reduce((s, so) => s + (parseFloat(so.amount_total) || 0), 0);
+    odooCtx = `
+ODOO LIVE DATA:
+  Open POs (purchase orders): ${odooData.purchase_orders.length} orders, total €${Math.round(poTotal).toLocaleString()}
+  Stock lines (internal locations): ${odooData.stock.length}
+  Recent sales (last 30 days): ${odooData.sales_pipeline.length} orders, total €${Math.round(sales30dTotal).toLocaleString()}`;
+  }
+
   return `You are a cash flow analyst for Salama Brewing Company Oy (Finnish craft brewery, growing ~62% YoY).
 Analysis date: ${TODAY.toISOString().slice(0, 10)}
 Current month budget revenue: €${Math.round(budgetRev).toLocaleString()}
 
 OPEN AR: €${Math.round(totalOpen).toLocaleString()} across ${open.length} invoices
-OVERDUE: €${Math.round(totalOverdue).toLocaleString()} across ${overdue.length} invoices
+OVERDUE: €${Math.round(totalOverdue).toLocaleString()} across ${overdue.length} invoices${odooCtx}
 
 ACTUAL PAYMENT BEHAVIOR (from invoice history):
 ${dsoLines}
@@ -248,147 +484,252 @@ function updateActionLog(actionLog, newActions) {
   return { history: filtered };
 }
 
-// ─── BRIEFING PROMPT ─────────────────────────────────────────────────────────
-function buildBriefingPrompt(invoices, insights, unclosedActions) {
+// ─── BRIEFINGS PROMPT ────────────────────────────────────────────────────────
+function buildBriefingsPrompt(invoices, actualDso, odooData, runType) {
   const isMonday = TODAY.getDay() === 1;
   const hour     = TODAY.getUTCHours();
-  const runType  = hour < 12 ? 'Morning' : 'Evening';
+  if (!runType) runType = isMonday ? 'weekly' : (hour < 12 ? 'morning' : 'evening');
 
   const open     = invoices.filter(i => i.status !== 'PAID');
   const overdue  = open.filter(i => i.status === 'OVERDUE' || new Date(i.dueDate) < TODAY);
   const totalOpen    = open.reduce((s, i) => s + i.amount, 0);
   const totalOverdue = overdue.reduce((s, i) => s + i.amount, 0);
 
-  // Overdue grouped by customer, sorted by total desc
-  const byCustomer = {};
-  overdue.forEach(inv => {
-    if (!byCustomer[inv.customer]) byCustomer[inv.customer] = { total: 0, items: [] };
-    const daysLate = Math.round((TODAY - new Date(inv.dueDate)) / 86400000);
-    byCustomer[inv.customer].total += inv.amount;
-    byCustomer[inv.customer].items.push(`#${inv.id} €${Math.round(inv.amount).toLocaleString()} (${daysLate}d late)`);
-  });
-  const overdueLines = Object.entries(byCustomer)
-    .sort((a, b) => b[1].total - a[1].total)
-    .map(([c, d]) => `  ${c}: €${Math.round(d.total).toLocaleString()} — ${d.items.join(', ')}`)
+  // Top 5 overdue by amount
+  const top5Overdue = [...overdue]
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 5)
+    .map(i => `  ${i.customer}: €${Math.round(i.amount).toLocaleString()} (due ${i.dueDate}, ${Math.round((TODAY - new Date(i.dueDate))/86400000)}d late)`)
     .join('\n') || '  None';
 
-  const unclosedLines = unclosedActions.length
-    ? unclosedActions.map(a =>
-        `  [${(a.role||'ALL').toUpperCase()}] "${a.text}" — ${a.days_open}d open${a.invoiceId ? ` (inv#${a.invoiceId})` : ''}`)
-      .join('\n')
-    : '  None — clean slate';
+  // DSO summary
+  const dsoLines = Object.entries(actualDso)
+    .map(([c, d]) => `  ${c}: ${d.actual_avg}d avg (baseline ${d.baseline}d, ${d.delta >= 0 ? '+' : ''}${d.delta}d, trend: ${d.trend})`)
+    .join('\n') || '  No DSO history — using baselines';
 
-  const urgentAlerts = (insights.alerts || []).filter(a => a.level === 'urgent').map(a => a.message).join('; ') || 'none';
+  // Odoo context
+  let odooCtx = '  No live Odoo data — using demo invoices';
+  let poTotal = 0, stockLines = 0, sales30dCount = 0, sales30dTotal = 0;
+  if (odooData) {
+    poTotal = odooData.purchase_orders.reduce((s, p) => s + (parseFloat(p.amount_total) || 0), 0);
+    stockLines = odooData.stock.length;
+    sales30dCount = odooData.sales_pipeline.length;
+    sales30dTotal = odooData.sales_pipeline.reduce((s, so) => s + (parseFloat(so.amount_total) || 0), 0);
+    odooCtx = `  Open POs: ${odooData.purchase_orders.length} orders totalling €${Math.round(poTotal).toLocaleString()}
+  Stock: ${stockLines} quant lines (internal locations)
+  Sales (last 30d): ${sales30dCount} confirmed orders, €${Math.round(sales30dTotal).toLocaleString()}`;
+  }
 
-  return `You are generating ${runType}${isMonday ? ' Monday' : ''} management briefings for Salama Brewing Company Oy.
-Finnish craft brewery. €2.4M revenue target 2026. Growing fast (~62% YoY). Team is small — every hour matters.
-Date: ${TODAY.toISOString().slice(0,10)} — ${runType} run.
-${isMonday ? 'TODAY IS MONDAY — add a "weekly" section for the team meeting.\n' : ''}
+  const currentMonth = TODAY.getMonth();
+  const BUD12_local = [116575,167111,174194,201863,204761,209750,229261,281684,234374,188881,209865,154095];
+  const budgetRev = BUD12_local[currentMonth] || 0;
+
+  return `You are generating ${runType} management briefings for Salama Brewing Company Oy.
+Finnish craft brewery. €2.4M revenue target 2026. Growing fast (~62% YoY). Small team — every hour matters.
+Date: ${TODAY.toISOString().slice(0,10)} · Run type: ${runType}
+${isMonday ? 'TODAY IS MONDAY — include the "weekly" section.\n' : ''}
 CASH SNAPSHOT:
   Open AR: €${Math.round(totalOpen).toLocaleString()} across ${open.length} invoices
   Overdue: €${Math.round(totalOverdue).toLocaleString()} across ${overdue.length} invoices
-  Fixed monthly costs: €62,781 (salary + OP loan — cannot be deferred)
-  Biggest cash risk this week: ${insights.weekly_cash_risk || 'n/a'}
-  Urgent alerts: ${urgentAlerts}
-  WC note: ${insights.wc_note || 'n/a'}
+  Current month budget revenue: €${Math.round(budgetRev).toLocaleString()}
+  Fixed monthly costs: €62,781 (personnel €47,425 + OP loan €15,356 — immovable)
 
-OVERDUE INVOICES (sorted by amount):
-${overdueLines}
+TOP 5 OVERDUE INVOICES:
+${top5Overdue}
 
-UNCLOSED ACTIONS FROM PREVIOUS BRIEFINGS:
-${unclosedLines}
+ODOO LIVE DATA:
+${odooCtx}
 
-CUSTOMER PAYMENT PATTERNS:
+CUSTOMER DSO PATTERNS:
+${dsoLines}
+
+CUSTOMER PAYMENT SEGMENTS:
   Own channels (Espoo Shop, Online, Own Bars): 3–5d — fast cash, protect
   Domestic trade (Kesko, SOK, Alko): 21–39d — generally reliable
-  Bars & Pubs FI: 41d avg but slow — follow up at 35d
+  Bars & Pubs FI: 41d avg but often slow — follow up at 35d
   Export (Brill, Systembolaget, Other): 48–57d — bulk of AR, long tail
   Bemböle: €25K/month fixed contract, ends September 2026
 
-KEY CONTEXT:
-  August = peak production. Cash from Aug shipments arrives Oct–Nov.
+KEY BUSINESS CONTEXT:
+  August = revenue peak (€282K budget). Cash from Aug shipments arrives Oct–Nov.
   Raw materials for summer must be ordered by end of April.
   China export order planned later this year (not yet in forecast).
+  Bemböle production contract ends Sep 2026 — needs replacement revenue.
 
-Generate tight, role-specific briefings. Be specific: use customer names, amounts, dates.
-Each briefing must be readable in under 90 seconds. Status must reflect real urgency.
+ROLE-SPECIFIC GUIDANCE:
+  CEO: cash position, runway, AR health, strategic risks, financial lever to pull
+  Sales: which customers to chase today, pipeline opportunities, DSO by customer
+  Production: raw material stock coverage, PO status, brew schedule impact vs cash
+  Marketing: channel performance, which channels generate fastest cash, budget utilization
+
+Generate tight, role-specific briefings across THREE time horizons per role.
+Be specific: use customer names, amounts, dates. Each section readable in under 60 seconds.
+Status must reflect REAL urgency based on the numbers above.
 
 Return ONLY valid JSON (no markdown, no explanation):
 {
-  "ceo": {
-    "status": "green|amber|red",
-    "headline": "<12 words max — the one thing the CEO/CFO must know>",
-    "cash_position": "<current cash + what changes this week in one line>",
-    "ar_summary": "<total open + overdue split + biggest exposure in one line>",
-    "runway": "<at current burn, how many weeks of cash runway — be specific>",
-    "narrative": "<2–3 sentences: financial situation + what's at risk + decision needed>",
-    "actions": [
-      {"id": "ceo-1", "text": "<specific action — financial, operational, or approval>", "urgent": true, "invoiceId": <number or null>}
-    ],
-    "focus": "<one sentence: CFO-level priority — what financial lever to pull today>"
+  "run_type": "${runType}",
+  "unclosed_count": 0,
+  "unclosed": [],
+  "roles": {
+    "ceo": {
+      "7day": {
+        "status": "red|amber|green",
+        "headline": "<12 words max — the one thing CEO/CFO must know this week>",
+        "narrative": "<2–3 sentences: cash situation + what changes this week + decision needed>",
+        "focus": "<single most important focus for CEO today>",
+        "cash_in_7d": <estimated euros coming in next 7 days>,
+        "cash_out_7d": <estimated fixed outflows next 7 days>,
+        "actions": [{"id":"c7_1","text":"<specific action>","urgent":true}]
+      },
+      "monthly": {
+        "status": "red|amber|green",
+        "headline": "<monthly financial health in 12 words>",
+        "narrative": "<2–3 sentences: monthly revenue vs budget + AR + working capital>",
+        "kpis": {"revenue_forecast":"€X","vs_budget":"+X%","open_ar":"€X"},
+        "actions": [{"id":"cm_1","text":"<monthly action>","urgent":false}]
+      },
+      "13week": {
+        "status": "red|amber|green",
+        "headline": "<13-week outlook in 12 words>",
+        "narrative": "<2–3 sentences: structural risks, cash trough, August peak planning>",
+        "risks": ["<risk 1>","<risk 2>"],
+        "actions": [{"id":"c13_1","text":"<strategic action>","urgent":false}]
+      }
+    },
+    "sales": {
+      "7day": {
+        "status": "red|amber|green",
+        "headline": "<collections message>",
+        "narrative": "<who to call, overdue amounts, DSO trends>",
+        "focus": "<single most important sales/collections focus>",
+        "cash_in_7d": <expected collections>,
+        "cash_out_7d": 0,
+        "actions": [{"id":"s7_1","text":"<specific customer action>","urgent":true}]
+      },
+      "monthly": {
+        "status": "red|amber|green",
+        "headline": "<monthly sales health>",
+        "narrative": "<pipeline vs target, channel performance>",
+        "kpis": {"pipeline_total":"€X","overdue_ratio":"X%","dso_trend":"improving|stable|worsening"},
+        "actions": [{"id":"sm_1","text":"<monthly sales action>","urgent":false}]
+      },
+      "13week": {
+        "status": "red|amber|green",
+        "headline": "<13-week sales outlook>",
+        "narrative": "<seasonal opportunities, export pipeline, Bemböle replacement>",
+        "risks": ["<risk 1>","<risk 2>"],
+        "actions": [{"id":"s13_1","text":"<strategic sales action>","urgent":false}]
+      }
+    },
+    "production": {
+      "7day": {
+        "status": "red|amber|green",
+        "headline": "<production/materials message>",
+        "narrative": "<immediate material needs vs cash position>",
+        "focus": "<single most important production focus>",
+        "cash_in_7d": 0,
+        "cash_out_7d": <expected material payments>,
+        "actions": [{"id":"p7_1","text":"<immediate production action>","urgent":false}]
+      },
+      "monthly": {
+        "status": "red|amber|green",
+        "headline": "<monthly production health>",
+        "narrative": "<material orders, brew schedule, PO commitments>",
+        "kpis": {"open_pos":"€X","stock_lines":"X","brew_capacity":"X%"},
+        "actions": [{"id":"pm_1","text":"<monthly production action>","urgent":false}]
+      },
+      "13week": {
+        "status": "red|amber|green",
+        "headline": "<13-week production planning>",
+        "narrative": "<August capacity planning, material ordering timeline, cost forecasts>",
+        "risks": ["<risk 1>","<risk 2>"],
+        "actions": [{"id":"p13_1","text":"<strategic production action>","urgent":false}]
+      }
+    },
+    "marketing": {
+      "7day": {
+        "status": "red|amber|green",
+        "headline": "<spend vs cash message>",
+        "narrative": "<what spend is safe this week, what to hold>",
+        "focus": "<single most important marketing focus>",
+        "cash_in_7d": 0,
+        "cash_out_7d": <expected marketing spend>,
+        "actions": [{"id":"m7_1","text":"<immediate marketing action>","urgent":false}]
+      },
+      "monthly": {
+        "status": "red|amber|green",
+        "headline": "<monthly marketing health>",
+        "narrative": "<budget utilization, which channels perform best>",
+        "kpis": {"budget_used":"X%","best_channel":"<name>","roi_trend":"improving|stable|worsening"},
+        "actions": [{"id":"mm_1","text":"<monthly marketing action>","urgent":false}]
+      },
+      "13week": {
+        "status": "red|amber|green",
+        "headline": "<13-week marketing outlook>",
+        "narrative": "<summer campaign timing, August peak strategy, Bemböle replacement channels>",
+        "risks": ["<risk 1>","<risk 2>"],
+        "actions": [{"id":"m13_1","text":"<strategic marketing action>","urgent":false}]
+      }
+    }
   },
-  "sales": {
-    "status": "green|amber|red",
-    "headline": "<key collection message>",
-    "narrative": "<AR situation + who to call + DSO trend>",
-    "actions": [
-      {"id": "sales-1", "text": "<specific customer or invoice action>", "urgent": true, "invoiceId": <number or null>}
-    ],
-    "focus": "<one sentence>"
-  },
-  "production": {
-    "status": "green|amber|red",
-    "headline": "<funding or scheduling message>",
-    "narrative": "<raw material funding gap + timing + what's at risk>",
-    "actions": [
-      {"id": "prod-1", "text": "<raw material, schedule, or supplier action>", "urgent": false, "invoiceId": null}
-    ],
-    "focus": "<one sentence>"
-  },
-  "marketing": {
-    "status": "green|amber|red",
-    "headline": "<spend vs cash position>",
-    "narrative": "<what spend is safe + what to hold + campaign timing vs cash>",
-    "actions": [
-      {"id": "mkt-1", "text": "<spend approval or hold action>", "urgent": false, "invoiceId": null}
-    ],
-    "focus": "<one sentence>"
-  }${isMonday ? `,
   "weekly": {
     "headline": "<week ahead in 10 words>",
-    "highlights": ["<3–5 bullets: what happened last week, what changed, what's at risk>"],
-    "decisions_needed": ["<2–3 decisions management must make this week>"],
-    "trend": "improving|stable|worsening"
-  }` : ''}
+    "trend": "improving|stable|worsening",
+    "highlights": ["<highlight 1>","<highlight 2>","<highlight 3>"],
+    "decisions_needed": ["<decision 1>","<decision 2>"]
+  }
 }`;
 }
 
 function extractActionsForLog(briefings) {
   const roles = ['ceo', 'sales', 'production', 'marketing'];
+  const horizons = ['7day', 'monthly', '13week'];
   const actions = [];
+  const rolesData = briefings.roles || briefings; // support both new (with .roles) and old format
   roles.forEach(role => {
-    const b = briefings[role];
-    if (!b || !b.actions) return;
-    b.actions.forEach(a => {
-      actions.push({
-        id:        a.id || `${role}-${Date.now()}`,
-        role,
-        text:      a.text,
-        urgent:    a.urgent || false,
-        invoiceId: a.invoiceId || null,
-        status:    'open',
+    const roleData = rolesData[role];
+    if (!roleData) return;
+    // New format: role data has horizons
+    if (roleData['7day'] || roleData.monthly || roleData['13week']) {
+      horizons.forEach(h => {
+        const hData = roleData[h];
+        if (!hData || !hData.actions) return;
+        hData.actions.forEach(a => {
+          actions.push({
+            id:        a.id || `${role}-${h}-${Date.now()}`,
+            role,
+            horizon:   h,
+            text:      a.text,
+            urgent:    a.urgent || false,
+            invoiceId: a.invoiceId || null,
+            status:    'open',
+          });
+        });
       });
-    });
+    } else if (roleData.actions) {
+      // Old flat format fallback
+      roleData.actions.forEach(a => {
+        actions.push({
+          id:        a.id || `${role}-${Date.now()}`,
+          role,
+          text:      a.text,
+          urgent:    a.urgent || false,
+          invoiceId: a.invoiceId || null,
+          status:    'open',
+        });
+      });
+    }
   });
   return actions;
 }
 
 // ─── ANTHROPIC API CALL ─────────────────────────────────────────────────────
-function callClaude(apiKey, prompt) {
+function callClaude(apiKey, prompt, maxTokens) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
       model: MODEL,
-      max_tokens: 700,
+      max_tokens: maxTokens || 700,
       messages: [{ role: 'user', content: prompt }],
     });
     const req = https.request({
@@ -432,14 +773,49 @@ async function main() {
     process.exit(1);
   }
 
-  // Load invoices
+  // ── Try Odoo connection ─────────────────────────────────────────────────
+  let odooData = null;
+  if (ODOO_KEY) {
+    console.log('\nConnecting to Odoo...');
+    try {
+      const uid = await odooAuthenticate();
+      if (uid) {
+        odooData = await fetchOdooData(uid);
+        // Save raw inventory data for the dashboard
+        fs.mkdirSync(path.dirname(ODOO_INV_OUT), { recursive: true });
+        fs.writeFileSync(ODOO_INV_OUT, JSON.stringify(odooData.stock, null, 2));
+        console.log(`✓ Odoo inventory saved to: ${ODOO_INV_OUT}`);
+      }
+    } catch (e) {
+      console.warn('Odoo connection failed, falling back to demo data:', e.message);
+      odooData = null;
+    }
+  } else {
+    console.log('ODOO_KEY not set — skipping Odoo connection');
+  }
+
+  // ── Load invoices ────────────────────────────────────────────────────────
   let invoices;
-  if (args.file) {
-    console.log(`Loading invoices: ${args.file}`);
+  if (odooData && odooData.invoices.length > 0) {
+    // Convert Odoo invoices to internal format
+    console.log('\nConverting Odoo invoices to internal format...');
+    invoices = odooData.invoices.map(inv => ({
+      id:       inv.id,
+      date:     (inv.invoice_date || '').slice(0, 10),
+      dueDate:  (inv.invoice_date_due || '').slice(0, 10),
+      customer: (inv.partner_id && inv.partner_id[1]) || 'Unknown',
+      amount:   parseFloat(inv.amount_residual) || 0,
+      paidDate: null,
+      status:   inv.payment_state === 'partial' ? 'UNPAID' :
+                (inv.invoice_date_due && new Date(inv.invoice_date_due) < TODAY) ? 'OVERDUE' : 'UNPAID',
+    })).filter(r => r.amount > 0);
+    console.log(`  → ${invoices.length} open invoices from Odoo`);
+  } else if (args.file) {
+    console.log(`\nLoading invoices: ${args.file}`);
     invoices = parseCSV(args.file);
     console.log(`  → ${invoices.length} invoices loaded`);
   } else {
-    console.log('Using demo invoice data (no --invoice-file provided)');
+    console.log('\nUsing demo invoice data (no Odoo connection, no --invoice-file)');
     invoices = DEMO_INVOICES;
   }
 
@@ -448,12 +824,22 @@ async function main() {
   const dsoKeys   = Object.keys(actualDso);
   console.log(`DSO patterns found: ${dsoKeys.length > 0 ? dsoKeys.join(', ') : 'none (demo or no paid invoices)'}`);
 
-  // Call Claude
-  console.log('\nCalling Claude API...');
-  const prompt = buildPrompt(invoices, actualDso);
+  // ── Odoo summary banner ───────────────────────────────────────────────────
+  if (odooData) {
+    const poTotal = odooData.purchase_orders.reduce((s, p) => s + (parseFloat(p.amount_total) || 0), 0);
+    console.log('\n─── Odoo Data ────────────────────────────────');
+    console.log(`  Open invoices (AR):   ${odooData.invoices.length}`);
+    console.log(`  Open POs:             ${odooData.purchase_orders.length} (€${Math.round(poTotal).toLocaleString()})`);
+    console.log(`  Stock quant lines:    ${odooData.stock.length}`);
+    console.log(`  Recent sales (30d):   ${odooData.sales_pipeline.length}`);
+  }
+
+  // ── Call Claude for insights ──────────────────────────────────────────────
+  console.log('\nCalling Claude API (insights)...');
+  const prompt = buildPrompt(invoices, actualDso, odooData);
   let rawResponse;
   try {
-    rawResponse = await callClaude(args.key, prompt);
+    rawResponse = await callClaude(args.key, prompt, 700);
   } catch(e) {
     console.error('API call failed:', e.message);
     process.exit(1);
@@ -474,6 +860,20 @@ async function main() {
     }
   }
 
+  // Build Odoo summary for insights.json (summarized, not raw)
+  let odooSummary = null;
+  if (odooData) {
+    const poTotal = odooData.purchase_orders.reduce((s, p) => s + (parseFloat(p.amount_total) || 0), 0);
+    const sales30dTotal = odooData.sales_pipeline.reduce((s, so) => s + (parseFloat(so.amount_total) || 0), 0);
+    odooSummary = {
+      invoice_count:      odooData.invoices.length,
+      purchase_order_total: Math.round(poTotal),
+      stock_lines:        odooData.stock.length,
+      sales_30d_count:    odooData.sales_pipeline.length,
+      sales_30d_total:    Math.round(sales30dTotal),
+    };
+  }
+
   // Save insights
   const output = {
     generated_at:    TODAY.toISOString(),
@@ -483,22 +883,23 @@ async function main() {
     invoice_count:   invoices.length,
     open_count:      invoices.filter(i => i.status !== 'PAID').length,
     overdue_count:   invoices.filter(i => i.status === 'OVERDUE').length,
+    odoo_data:       odooSummary,
   };
 
   fs.mkdirSync(path.dirname(OUTPUT), { recursive: true });
   fs.writeFileSync(OUTPUT, JSON.stringify(output, null, 2));
   console.log('\n✓ Insights saved to:', OUTPUT);
 
-  // ── Generate role briefings ──────────────────────────────────────────────
+  // ── Generate role briefings ───────────────────────────────────────────────
   const actionLog       = loadActionLog();
   const unclosedActions = getUnclosedActions(actionLog, invoices);
   console.log(`Unclosed actions carried over: ${unclosedActions.length}`);
 
-  const briefingPrompt = buildBriefingPrompt(invoices, insights, unclosedActions);
-  console.log('\nGenerating role briefings...');
+  const briefingPrompt = buildBriefingsPrompt(invoices, actualDso, odooData);
+  console.log('\nGenerating role briefings (2000 tokens)...');
   let briefingRaw;
   try {
-    briefingRaw = await callClaude(args.key, briefingPrompt);
+    briefingRaw = await callClaude(args.key, briefingPrompt, 2000);
   } catch(e) {
     console.warn('Briefing API call failed (insights already saved):', e.message);
     briefingRaw = null;
@@ -518,13 +919,19 @@ async function main() {
     const newActions = extractActionsForLog(briefings);
     const updatedLog = updateActionLog(actionLog, newActions);
 
+    // Support both new format (with .roles) and fallback
+    const rolesData = briefings.roles || {
+      ceo: briefings.ceo, sales: briefings.sales,
+      production: briefings.production, marketing: briefings.marketing
+    };
+
     const briefingOutput = {
       generated_at:   TODAY.toISOString(),
       is_monday:      TODAY.getDay() === 1,
-      run_type:       TODAY.getUTCHours() < 12 ? 'morning' : 'evening',
+      run_type:       briefings.run_type || (TODAY.getUTCHours() < 12 ? 'morning' : 'evening'),
       unclosed_count: unclosedActions.length,
       unclosed:       unclosedActions,
-      roles:          { ceo: briefings.ceo, sales: briefings.sales, production: briefings.production, marketing: briefings.marketing },
+      roles:          rolesData,
       weekly:         briefings.weekly || null,
     };
 
@@ -533,11 +940,12 @@ async function main() {
     console.log('✓ Briefings saved to:', BRIEFINGS_OUT);
     console.log('✓ Action log updated:', ACTION_LOG_PATH);
 
-    // Print CEO headline
-    const ceo = briefings.ceo || {};
-    console.log(`\n─── CEO Briefing [${(ceo.status||'?').toUpperCase()}] ──────────────────────`);
-    console.log(ceo.headline || '(none)');
-    if (ceo.actions?.length) ceo.actions.forEach((a,i) => console.log(`  ${i+1}. ${a.urgent?'🔴 ':''}${a.text}`));
+    // Print CEO 7-day headline
+    const ceo7 = (rolesData.ceo || {})['7day'] || rolesData.ceo || {};
+    const ceoStatus = ceo7.status || '?';
+    console.log(`\n─── CEO Briefing (7-day) [${ceoStatus.toUpperCase()}] ────────────`);
+    console.log(ceo7.headline || '(none)');
+    if (ceo7.actions?.length) ceo7.actions.forEach((a,i) => console.log(`  ${i+1}. ${a.urgent?'🔴 ':''}${a.text}`));
   }
 
   // Print summary
@@ -554,6 +962,11 @@ async function main() {
     Object.entries(insights.dso_updates || {}).forEach(([c, d]) =>
       console.log(`  ${c}: ${d.recommended_dso}d (${d.confidence}) — ${d.reason}`)
     );
+  }
+  if (odooData) {
+    const poTotal = odooData.purchase_orders.reduce((s, p) => s + (parseFloat(p.amount_total) || 0), 0);
+    console.log('\n─── Odoo Summary ─────────────────────────────');
+    console.log(`  Invoices: ${odooData.invoices.length} · POs: €${Math.round(poTotal).toLocaleString()} · Stock: ${odooData.stock.length} lines`);
   }
   console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 }

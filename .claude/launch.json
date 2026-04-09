@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "salama-dashboard",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "7823", "/Users/rene/Library/CloudStorage/Dropbox/Documents/Claude Cowork/Salama"],
+      "port": 7823
+    }
+  ]
+}
