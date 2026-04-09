@@ -1,12 +1,10 @@
 name: Daily Cash Flow Analysis
 
 on:
-  # PAUSED — re-enable schedule when Procountor API is active
-  # schedule:
-  #   - cron: '0 3 * * 1-5'   # 06:00 Helsinki (summer EEST = UTC+3), weekdays
-  #   - cron: '0 14 * * 1-5'  # 17:00 Helsinki (summer EEST = UTC+3), weekdays
+  schedule:
+    - cron: '0 3 * * 1-5'   # 06:00 Helsinki (summer EEST = UTC+3), weekdays
+    - cron: '0 14 * * 1-5'  # 17:00 Helsinki (summer EEST = UTC+3), weekdays
 
-  # Manual trigger only (from GitHub Actions UI)
   workflow_dispatch:
     inputs:
       invoice_file:
@@ -35,19 +33,27 @@ jobs:
         if: ${{ github.event.inputs.invoice_file == '' || github.event_name == 'schedule' }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ODOO_KEY: ${{ secrets.ODOO_KEY }}
+          ODOO_URL: salama.avoin.app
+          ODOO_DB: salama.avoin.app
+          ODOO_USER: christian@salamabrewing.com
         run: node analyze.js
 
       - name: Run analysis (with invoice file)
         if: ${{ github.event.inputs.invoice_file != '' }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ODOO_KEY: ${{ secrets.ODOO_KEY }}
+          ODOO_URL: salama.avoin.app
+          ODOO_DB: salama.avoin.app
+          ODOO_USER: christian@salamabrewing.com
         run: node analyze.js --invoice-file "${{ github.event.inputs.invoice_file }}"
 
       - name: Commit insights to repo
         run: |
           git config user.name  "Salama Cash Bot"
           git config user.email "bot@salama-brewing.fi"
-          git add data/insights.json data/briefings.json data/action_log.json
+          git add data/insights.json data/briefings.json data/action_log.json data/odoo_inventory.json
           # Only commit if there are changes
           git diff --staged --quiet || git commit -m "chore: AI cash analysis + briefings $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push
