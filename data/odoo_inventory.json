@@ -1322,7 +1322,7 @@
       "[Core Range] Brainzilla Helles 4,8% 440 Can"
     ],
     "quantity": 2160,
-    "reserved_quantity": 1224,
+    "reserved_quantity": 1248,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1462,7 +1462,7 @@
       "[Core Range] Passion Razzie Fruited Sour 6,2% 440 Can"
     ],
     "quantity": 3384,
-    "reserved_quantity": 288,
+    "reserved_quantity": 312,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1546,7 +1546,7 @@
       "Aino Vallea olut 5,0% can 440"
     ],
     "quantity": 4320,
-    "reserved_quantity": 0,
+    "reserved_quantity": 24,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
