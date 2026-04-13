@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-13T05:45:50.611Z",
+  "generated_at": "2026-04-13T15:21:54.525Z",
   "model": "claude-haiku-4-5-20251001",
   "actual_dso": {},
   "insights": {
@@ -7,89 +7,106 @@
       "Alko Oy Keskusvarasto": {
         "recommended_dso": 45,
         "confidence": "high",
-        "reason": "Major distributor with 165+ days overdue; large balance (€18.5K) requires strict net-45 terms with prepayment verification."
+        "reason": "Major distributor with 169-day overdue invoice #4460 (€18.5K); needs immediate resolution protocol."
       },
       "Kesko Oyj Päivittäistavarakauppa": {
         "recommended_dso": 30,
         "confidence": "high",
-        "reason": "10 days overdue on €3.3K; large retailer chain should pay net-30 with escalation protocol."
+        "reason": "Large retail chain; invoice #5750 now 10 days overdue—tighten terms to prevent escalation."
       },
       "My Dear Beer B.V.": {
-        "recommended_dso": 35,
+        "recommended_dso": 45,
         "confidence": "medium",
-        "reason": "57 days overdue on €9.6K export invoice; EU customer likely caught in logistics; recommend net-35 with deposit."
+        "reason": "Export customer with 57-day overdue invoice #5151; export DSO baseline 6-8 weeks applicable but payment missing."
       },
       "OlutSatama (Ideaosuuskunta Aito)": {
-        "recommended_dso": 50,
+        "recommended_dso": 30,
         "confidence": "medium",
-        "reason": "281 days overdue on €5.9K; cooperative structure suggests chronic cash flow; switch to net-50 COD or prepay."
+        "reason": "Domestic partner; 283-day overdue invoice #3837 suggests structural issue or dispute—requires investigation."
       },
-      "Own Channels (Espoo Shop, Online, Own Bars)": {
+      "Wittich Weine und Biere AG": {
+        "recommended_dso": 30,
+        "confidence": "medium",
+        "reason": "Export customer now 3 days overdue on €3.2K; monitor closely for pattern."
+      },
+      "Own Channels (Espoo Shop, Online Shop, Own Bars)": {
         "recommended_dso": 4,
         "confidence": "high",
-        "reason": "Highest priority; internal channels must remain 3-5 day DSO to support fixed €62.8K/month obligations."
+        "reason": "Maintain 3-5 day DSO; these are primary liquidity buffer for €62.8K fixed monthly costs."
       }
     },
     "alerts": [
       {
         "level": "urgent",
         "customer": "Alko Oy Keskusvarasto",
-        "message": "Escalate immediately: €18.5K overdue 165 days (invoice #4460, due 2025-10-30). Contact legal/credit department; if no commitment to payment plan by 2026-04-15, file demand notice. This represents 15% of total overdue AR.",
+        "message": "Escalate invoice #4460 (€18,484, 166 days overdue since 2025-10-30) to legal/collections immediately. This is 22% of total overdue AR. Confirm receipt, dispute status, and demand payment within 5 business days or suspend shipments.",
         "amount": 18484
       },
       {
         "level": "urgent",
-        "customer": "My Dear Beer B.V.",
-        "message": "Contact customer today with formal payment demand for €9.6K (invoice #5151, 57 days overdue). Verify customs/logistics delays; if not cleared, initiate chargeback or escalate to trade credit insurer.",
-        "amount": 9558
+        "customer": "Wet Goods PTE LTD",
+        "message": "Invoice #14 (€4,540, 577 days overdue since 2024-08-14) is uncollectable write-off risk. Verify customer solvency and decide: pursue legal recovery or write off to bad debt today.",
+        "amount": 4540
       },
       {
         "level": "urgent",
         "customer": "OlutSatama (Ideaosuuskunta Aito)",
-        "message": "€5.9K outstanding 281 days (invoice #3837, due 2025-07-05). Likely uncollectible; escalate to collections or write-off review by 2026-04-20. Do not extend further credit.",
+        "message": "Invoice #3837 (€5,882, 283 days overdue since 2025-07-05) indicates dispute or insolvency. Contact immediately to clarify payment blockers; if unresolvable, reserve for impairment.",
         "amount": 5882
       },
       {
         "level": "warning",
-        "customer": null,
-        "message": "Open AR €120.6K across 75 invoices + €82.2K overdue across 65 invoices = €202.8K total AR equals 101% of April budget revenue. With 62% YoY growth, working capital is stretched. Prioritize collection of top 5 overdue (€41.4K) before month-end.",
-        "amount": 202811
+        "customer": "Kesko Oyj Päivittäistavarakauppa",
+        "message": "Invoice #5750 (€3,296) due 2026-04-03 now 10 days overdue. Send formal notice today; confirm whether this signals cash strain at retail chain or administrative delay.",
+        "amount": 3296
       },
       {
         "level": "warning",
-        "customer": "Wet Goods PTE LTD",
-        "message": "Invoice #14 is 607 days overdue (€4.5K, due 2024-08-14). Assume uncollectible and initiate write-off process; likely no contact/dissolved entity.",
-        "amount": 4540
+        "customer": "My Dear Beer B.V.",
+        "message": "Invoice #5151 (€9,558, 57 days overdue since 2026-02-16) exceeds export DSO baseline (6-8 weeks = 42-56 days). Contact importer to confirm shipment receipt and payment ETA within 3 days.",
+        "amount": 9558
       },
       {
         "level": "warning",
-        "customer": null,
-        "message": "Recent 30-day sales (€39.4K) are 19.5% of April budget (€201.9K), suggesting sales pipeline tracking below forecast. Verify April revenue will hit budget to maintain €62.8K fixed cost coverage.",
-        "amount": 39382
+        "customer": "Wittich Weine und Biere AG",
+        "message": "Invoice #5999 (€3,236) due 2026-04-10 now 3 days overdue. Send payment reminder today; watch for export payment delays.",
+        "amount": 3236
+      },
+      {
+        "level": "warning",
+        "customer": "Kitty's Public house (HOK-Elanto liiketoiminta Oy)",
+        "message": "Invoice #6047 (€1,747) due 2026-04-12 now 1 day overdue. Quick follow-up—this is a small domestic on-premise account; may be administrative.",
+        "amount": 1747
       },
       {
         "level": "info",
         "customer": null,
-        "message": "44 open POs (€80K) + 101 internal stock lines indicate healthy production capacity. Ensure €80K payment schedule aligns with incoming export cash (6-8 weeks post-August peak); build cash buffer now.",
+        "message": "Overdue AR (€82,216 / 65 invoices) is 38% of total AR (€131,931). At 62% YoY growth, DSO creep is critical risk. Implement weekly AR aging reports and DSO targets by customer segment starting this week.",
+        "amount": 82216
+      },
+      {
+        "level": "info",
+        "customer": null,
+        "message": "Open POs (€79,996) are 39% of monthly budget revenue (€201,863). Ensure incoming stock converts to sales/cash within 4-6 weeks to avoid working capital squeeze as growth accelerates.",
         "amount": 79996
       }
     ],
-    "weekly_cash_risk": "€82.2K overdue AR (41% of open balance) with €18.5K + €9.6K concentrated in two customers represents immediate liquidity risk if collections fail; combined with €62.8K fixed monthly costs and sub-target April sales (€39.4K last 30 days), cash coverage for May is at risk.",
-    "top_action": "Execute collection call blitz today (2026-04-13) targeting Alko Oy (€18.5K), My Dear Beer B.V. (€9.6K), and OlutSatama (€5.9K); demand written payment commitment by 2026-04-15 or escalate to legal/credit; simultaneously verify April revenue trajectory to confirm €201.9K forecast is on track.",
+    "weekly_cash_risk": "€82.2K overdue AR (38% of total) plus €62.8K fixed monthly costs due create severe liquidity strain if even 2-3 large customers (Alko, Kesko, My Dear Beer) remain unpaid beyond 10 April 2026.",
+    "top_action": "Today (2026-04-13): Call Alko Oy (invoice #4460, €18.5K, 166 days overdue) and Kesko Oyj (invoice #5750, €3.3K, 10 days overdue) directly. Demand payment confirmation or dispute explanation within 24 hours. If Alko cannot commit to payment by 2026-04-20, initiate suspension of shipments to protect cash for payroll/loan on 2026-04-30.",
     "pattern_insights": [
-      "Large distributor/retailer segment (Alko, Kesko, OlutSatama) shows 165+ days overdue; indicates either systemic payment delays in Finnish retail distribution or contract disputes; recommend credit insurance or net-20 COD for future Alko orders.",
-      "Export customers (My Dear Beer B.V., Made in Poland Bcn, Wittich Weine) cluster at 10-57 days overdue; 6-8 week export DSO is being stretched; implement pre-shipment deposit (30-50%) for non-EU/high-risk export orders effective immediately."
+      "Alko, Kesko, and OlutSatama (combined €27.7K overdue, 34% of overdue AR) are major distribution partners; non-payment suggests either systemic cash flow stress at retailer level or contractual disputes requiring escalation beyond AR team.",
+      "Export DSO baseline (6-8 weeks) is being exceeded by My Dear Beer B.V. (57 days) and Wittich Weine (now overdue); apply stricter export payment terms (prepay or confirmed L/C) to new orders effective immediately."
     ],
-    "wc_note": "At 62% YoY growth with €202.8K AR and only €39.4K recent sales velocity, working capital is critically extended; peak season cash (August €282K) arrives net 6-8 weeks, creating October liquidity crunch; Bemböle contract loss (€25K/mo Sept 2026) will worsen position unless overdue AR is recovered or credit terms tightened now."
+    "wc_note": "At 62% YoY growth, a DSO of 47+ days (131,931 AR ÷ 39,256 recent 30-day sales ≈ 100+ days implied) vs. 30-day payment terms is unsustainable; working capital is bleeding into AR. Recovery of €82K overdue is critical to fund April 2026 fixed costs (€62.8K) and avoid bridge financing."
   },
-  "invoice_count": 75,
-  "open_count": 75,
+  "invoice_count": 100,
+  "open_count": 100,
   "overdue_count": 65,
   "odoo_data": {
-    "invoice_count": 75,
+    "invoice_count": 100,
     "purchase_order_total": 79996,
-    "stock_lines": 101,
+    "stock_lines": 100,
     "sales_30d_count": 50,
-    "sales_30d_total": 39382
+    "sales_30d_total": 39256
   }
 }
