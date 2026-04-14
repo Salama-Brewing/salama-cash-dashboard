@@ -426,7 +426,7 @@
       "[Core Range] Firestarter NEIPA 7,0% 440 Can"
     ],
     "quantity": 312,
-    "reserved_quantity": 96,
+    "reserved_quantity": 120,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -776,7 +776,7 @@
       "[Core Range] Magic Gloves NEPA 5,3% 440 Can"
     ],
     "quantity": 5016,
-    "reserved_quantity": 1968,
+    "reserved_quantity": 1992,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1042,7 +1042,7 @@
       "[Core Range] Octoshock Sour 4,5% 440 can"
     ],
     "quantity": 3333,
-    "reserved_quantity": 72,
+    "reserved_quantity": 96,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1070,7 +1070,7 @@
       "Big Nelson NEIPA 6.5% 440 can"
     ],
     "quantity": 192,
-    "reserved_quantity": 144,
+    "reserved_quantity": 168,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1084,7 +1084,7 @@
       "Decapitation NEIPA 6,7% Can 440"
     ],
     "quantity": 1944,
-    "reserved_quantity": 240,
+    "reserved_quantity": 264,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1238,7 +1238,7 @@
       "[Core Range] Passion Razzie Fruited Sour 6,2% 440 Can"
     ],
     "quantity": 3144,
-    "reserved_quantity": 168,
+    "reserved_quantity": 192,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
