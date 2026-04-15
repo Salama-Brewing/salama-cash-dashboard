@@ -1,101 +1,84 @@
 {
-  "generated_at": "2026-04-15T05:28:28.643Z",
+  "generated_at": "2026-04-15T15:11:59.112Z",
   "model": "claude-haiku-4-5-20251001",
   "actual_dso": {},
   "insights": {
     "dso_updates": {
       "Alko Oy Keskusvarasto": {
-        "recommended_dso": 35,
+        "recommended_dso": 45,
         "confidence": "high",
-        "reason": "Major distributor with 168-day overdue invoice #4460 (€18.5K) suggests systemic payment delay or dispute; tighten terms pending resolution."
+        "reason": "Major distributor (€18.5K overdue 168 days); tighten terms immediately post-resolution to prevent recurrence."
       },
       "Kesko Oyj Päivittäistavarakauppa": {
         "recommended_dso": 30,
         "confidence": "high",
-        "reason": "Retail giant with €3.3K overdue 12 days; reliable payer but enforce stricter DSO to protect cash timing."
+        "reason": "Large retail chain (€3.3K due today); enforce net-30 COD or prepayment on future orders."
       },
       "My Dear Beer B.V.": {
-        "recommended_dso": 25,
+        "recommended_dso": 35,
         "confidence": "medium",
-        "reason": "Export customer (€9.6K, 58 days overdue); likely DSO creep from 6–8 week export cycle; codify and monitor weekly."
+        "reason": "EU distributor (€9.6K, 58 days overdue); export DSO applies but payment discipline needed."
       },
-      "Salama Shop": {
-        "recommended_dso": 5,
+      "Own Channels (Espoo Shop, Online, Bars)": {
+        "recommended_dso": 3,
         "confidence": "high",
-        "reason": "Internal channel massively overdue (€1.3K, 74 days); own operation must pay on par with other own channels (3–5 day target)."
-      },
-      "Wittich Weine und Biere AG": {
-        "recommended_dso": 40,
-        "confidence": "medium",
-        "reason": "German distributor, €3.2K overdue 5 days; assume 6–8 week export DSO norm but enforce ceiling."
+        "reason": "Protect cash conversion cycle; enforce 3-day settlement without exception."
       }
     },
     "alerts": [
       {
         "level": "urgent",
         "customer": "Alko Oy Keskusvarasto",
-        "message": "Escalate invoice #4460 (€18,484, 168 days overdue since 2025-10-30) to senior management today—contact decision-maker to confirm receipt, dispute status, and payment schedule within 48 hours or consider credit hold.",
+        "message": "Escalate #4460 (€18,484, 168 days overdue) to legal/collections immediately; block new shipments until payment plan agreed.",
         "amount": 18484
       },
       {
         "level": "urgent",
         "customer": null,
-        "message": "Total overdue (€73K, 43 invoices) is 36% of open AR and exceeds one month of fixed costs (€62.8K)—recovery of €73K is critical to avoid cash crisis by May. Implement daily overdue call blitz starting today.",
+        "message": "Total overdue (€73,005) equals 116% of April budget revenue; combined with €62,781 monthly fixed costs, cash runway is critical—focus collection calls on top 5 invoices (€43.5K, 60% of backlog).",
         "amount": 73005
       },
       {
         "level": "urgent",
-        "customer": "Salama Shop",
-        "message": "Internal channel €1.3K overdue 74 days—immediate transfer from operations to receivables or halt POS supply until settled; this erodes credibility with external customers.",
-        "amount": 1301
-      },
-      {
-        "level": "warning",
-        "customer": "My Dear Beer B.V.",
-        "message": "€9.6K overdue 58 days (invoice #5151, due 2026-02-16)—contact with specific payment date commitment; if export DSO is real, adjust future DSO to 45 days and request milestone payments.",
-        "amount": 9558
+        "customer": "Wet Goods PTE LTD",
+        "message": "Invoice #14 (€4,540, 579 days overdue since Aug 2024) is uncollectable; write off and investigate prior controls to prevent repeat.",
+        "amount": 4540
       },
       {
         "level": "warning",
         "customer": "OlutSatama (Ideaosuuskunta Aito)",
-        "message": "€5.9K overdue 285 days (invoice #3837)—likely uncollectible; review for write-off or settlement offer (50–70% recovery) and update credit policy.",
+        "message": "Invoice #3837 (€5,882, 285 days overdue) requires CEO phone call + payment plan or suspension of credit.",
         "amount": 5882
       },
       {
         "level": "warning",
+        "customer": "Gig Linden GmbH",
+        "message": "Invoice #6030 (€2,322) due today; monitor daily—if unpaid by 2026-04-17, escalate to collections.",
+        "amount": 2322
+      },
+      {
+        "level": "info",
         "customer": null,
-        "message": "44 open POs (€80K) + €121K open AR = €201K gross exposure on ~€202K monthly budget revenue; verify PO payment terms do not compress cash cycle further—defer non-critical orders until AR improves.",
+        "message": "44 open POs (€79,996) are material relative to April budget (€201,863); defer non-critical stock purchases until top-10 overdue invoices show payment activity.",
         "amount": 79996
-      },
-      {
-        "level": "info",
-        "customer": "Bemböle contract",
-        "message": "€25K/month contract ends September 2026 (4.5 months away)—model revenue impact and identify replacement customers to protect €150K pipeline before gap.",
-        "amount": 25000
-      },
-      {
-        "level": "info",
-        "customer": "Wet Goods PTE LTD",
-        "message": "€4.5K overdue 580 days (invoice #14, due 2024-08-14)—write off or escalate to collections; carrying dead debt wastes AR resources.",
-        "amount": 4540
       }
     ],
-    "weekly_cash_risk": "€73K overdue AR (36% of open book) plus €80K open POs creates 2–3 week cash runway risk if major debtors (Alko €18.5K, My Dear Beer €9.6K) do not remit by end of month, threatening €62.8K fixed cost coverage in May.",
-    "top_action": "Call Alko Oy Keskusvarasto decision-maker at 09:00 CET today to confirm payment status of invoice #4460 (€18.5K, 168 days overdue); escalate to your CFO if debtor claims non-receipt or disputes—this single invoice is 25% of overdue AR and cannot slip further.",
+    "weekly_cash_risk": "€73K overdue AR (43 invoices) plus €62.8K fixed costs due this month exceeds April revenue by 41%; Alko (€18.5K) and Bemböle contract end (Sept) create twin pressure—immediate collection action required or cash crisis likely in May.",
+    "top_action": "Place same-day collection calls to Alko Oy Keskusvarasto, Kesko, and My Dear Beer B.V. (combined €31.3K); demand payment by 2026-04-18 EOB or notify they are suspended from new orders effective 2026-04-19.",
     "pattern_insights": [
-      "Export customers (My Dear Beer, Wittich, Gig Linden) cluster in 5–12 day overdue range on recently due items, suggesting 6–8 week DSO is structural; codify and separate export DSO from domestic (25 days) to improve forecasting.",
-      "Three invoices >100 days overdue (Alko €18.5K, OlutSatama €5.9K, Wet Goods €4.5K = €28.8K or 39% of overdue bucket) are likely uncollectible or blocked by disputes; triage immediately for write-off vs. recovery effort to free AR team capacity."
+      "Mega-distributor payment discipline broken (Alko 168 days, Kesko 12 days overdue despite size); indicates pricing/terms negotiation failure or cash-flow stress on their end—request senior customer meetings.",
+      "Export customers (My Dear Beer B.V., Wittich Weine, Gig Linden) cluster in 8–58-day range, confirming 6–8 week DSO reality; build €30–40K monthly cash reserve for this lag or negotiate supply-chain financing."
     ],
-    "wc_note": "At 62% YoY growth with €121K open AR + €80K open POs against ~€39K monthly sales run rate, working capital is severely stretched; cash DSO of 50–60 days (implied by export cycle) conflicts with 44-day PO payment cycle, creating 2–4 week negative gap—urgent AR recovery and PO deferral required to sustain growth without external financing."
+    "wc_note": "62% YoY growth with €73K overdue and zero payment history baseline means working capital is severely strained; €129.6K open AR against €45.9K last-30-day sales implies 75-day DSO company-wide—unsustainable without debt facility or aggressive collection."
   },
-  "invoice_count": 79,
-  "open_count": 79,
+  "invoice_count": 80,
+  "open_count": 80,
   "overdue_count": 43,
   "odoo_data": {
-    "invoice_count": 79,
+    "invoice_count": 80,
     "purchase_order_total": 79996,
-    "stock_lines": 100,
+    "stock_lines": 103,
     "sales_30d_count": 50,
-    "sales_30d_total": 38315
+    "sales_30d_total": 45874
   }
 }
