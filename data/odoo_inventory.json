@@ -104,7 +104,7 @@
       "[Core Range] Death Wheke NZ Wheat Ale 5,0% 440 can"
     ],
     "quantity": 47,
-    "reserved_quantity": 24,
+    "reserved_quantity": 47,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -118,7 +118,7 @@
       "[Core Range] Death Wheke NZ Wheat Ale 5,0% 30L Keg"
     ],
     "quantity": 17,
-    "reserved_quantity": 3,
+    "reserved_quantity": 4,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -482,7 +482,7 @@
       "[Core Range] Magic Gloves NEPA 5,3% 440 Can (copy)"
     ],
     "quantity": 336,
-    "reserved_quantity": 24,
+    "reserved_quantity": 336,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -678,7 +678,7 @@
       "[Core Range] Death Of Barbie IPA 7,0% 30L Keg"
     ],
     "quantity": 5,
-    "reserved_quantity": 2,
+    "reserved_quantity": 3,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -748,7 +748,7 @@
       "[Core Range] Magic Gloves NEPA 5,3% 440 Can (copy)"
     ],
     "quantity": 984,
-    "reserved_quantity": 0,
+    "reserved_quantity": 120,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -790,7 +790,7 @@
       "[Core Range] Death Wheke NZ Wheat Ale 5,0% 440 can"
     ],
     "quantity": 960,
-    "reserved_quantity": 0,
+    "reserved_quantity": 409,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -874,7 +874,7 @@
       "[Core Range] Neon Beast NEIPA 6,0% 30L Keg"
     ],
     "quantity": 17,
-    "reserved_quantity": 4,
+    "reserved_quantity": 16,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -930,7 +930,7 @@
       "[Core Range] Neon Baby NEPA 5,5% 30L Keg"
     ],
     "quantity": 12,
-    "reserved_quantity": 2,
+    "reserved_quantity": 12,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -986,7 +986,7 @@
       "[Core Range] Octoshock Sour 4,5% 30l keg"
     ],
     "quantity": 42,
-    "reserved_quantity": 3,
+    "reserved_quantity": 15,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -999,8 +999,8 @@
       1447,
       "[Core Range] Octoshock Sour 4,5% 440 can"
     ],
-    "quantity": 3285,
-    "reserved_quantity": 120,
+    "quantity": 3213,
+    "reserved_quantity": 48,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1041,8 +1041,8 @@
       1787,
       "Decapitation NEIPA 6,7% Can 440"
     ],
-    "quantity": 1632,
-    "reserved_quantity": 168,
+    "quantity": 1560,
+    "reserved_quantity": 120,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1182,7 +1182,7 @@
       "[Core Range] Passion Razzie Fruited Sour 6,2% 20l keg"
     ],
     "quantity": 5,
-    "reserved_quantity": 1,
+    "reserved_quantity": 2,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1196,7 +1196,7 @@
       "[Core Range] Passion Razzie Fruited Sour 6,2% 440 Can"
     ],
     "quantity": 3000,
-    "reserved_quantity": 1824,
+    "reserved_quantity": 1848,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1224,7 +1224,7 @@
       "[Core Range] La-La Land American Pale Ale 5,2% 440 can (copy)"
     ],
     "quantity": 552,
-    "reserved_quantity": 24,
+    "reserved_quantity": 456,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1307,8 +1307,8 @@
       1829,
       "Old Kemi Lakka Porter 440ml Can"
     ],
-    "quantity": 1344,
-    "reserved_quantity": 48,
+    "quantity": 1296,
+    "reserved_quantity": 0,
     "location_id": [
       15,
       "BEM/Tax-free warehouse Bemböle"
@@ -1364,7 +1364,7 @@
       "Kiss Of Doom NE DIPA 7,9% can 440"
     ],
     "quantity": 1152,
-    "reserved_quantity": 432,
+    "reserved_quantity": 960,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1420,7 +1420,7 @@
       "Ghost Sharks NEPA 5.2% 30l keg"
     ],
     "quantity": 39,
-    "reserved_quantity": 6,
+    "reserved_quantity": 18,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
@@ -1434,7 +1434,7 @@
       "Ghost Sharks NEPA 5.2% can 440"
     ],
     "quantity": 3624,
-    "reserved_quantity": 384,
+    "reserved_quantity": 912,
     "location_id": [
       28,
       "KLO/Tax-free warehouse Klondyke"
