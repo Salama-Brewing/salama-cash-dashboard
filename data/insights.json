@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-16T15:45:34.041Z",
+  "generated_at": "2026-04-17T05:32:18.542Z",
   "model": "claude-haiku-4-5-20251001",
   "actual_dso": {},
   "insights": {
@@ -7,92 +7,81 @@
       "Alko Oy Keskusvarasto": {
         "recommended_dso": 45,
         "confidence": "high",
-        "reason": "Major Finnish retailer with 168-day overdue invoice #4460; enforce strict net-45 terms and require prepayment or COD for future orders until #4460 resolves."
+        "reason": "Large national distributor with 169-day overdue invoice; reduce DSO to 45 days and require prepayment on new orders until #4460 resolves."
       },
       "Kesko Oyj Päivittäistavarakauppa": {
         "recommended_dso": 30,
         "confidence": "high",
-        "reason": "Large retail chain, only 13 days overdue on €3,296; tighten to net-30 and monitor weekly given scale of exposure."
+        "reason": "Major retailer chain now 14 days overdue; tighten to 30 days and escalate collections immediately."
       },
       "My Dear Beer B.V.": {
         "recommended_dso": 35,
         "confidence": "medium",
-        "reason": "Export customer, 59 days overdue; likely DSO ~35–40 for EU distribution but requires payment plan confirmation."
+        "reason": "Export customer 60 days overdue; standard EU export DSO is 45–60 days, but payment friction suggests 35-day terms with prepay option."
       },
-      "Wittich Weine und Biere AG": {
-        "recommended_dso": 40,
-        "confidence": "medium",
-        "reason": "German importer, 6 days overdue; typical German B2B DSO 40–45; hold new shipments pending resolution of #5999."
-      },
-      "CBA Craft Beer Agency": {
-        "recommended_dso": 35,
-        "confidence": "medium",
-        "reason": "Distributor, 13 days overdue; enforce net-35 with automated dunning for future invoices."
+      "Own Channels (Espoo Shop, Online, Own Bars)": {
+        "recommended_dso": 3,
+        "confidence": "high",
+        "reason": "Highest-priority cash source; enforce same-day or next-day settlement to protect minimum liquidity."
       }
     },
     "alerts": [
       {
         "level": "urgent",
         "customer": "Alko Oy Keskusvarasto",
-        "message": "Invoice #4460 (€18,484) is 534 days overdue. Escalate to legal/credit control immediately; suspend all new credit and require prepayment. This is material to cash flow.",
+        "message": "Invoice #4460 (€18,484) is 170 days overdue. Escalate to senior management and legal immediately; freeze all shipments until payment or arrangement agreed.",
         "amount": 18484
       },
       {
         "level": "urgent",
-        "customer": "Wet Goods PTE LTD",
-        "message": "Invoice #14 (€4,540) is 975 days overdue. Write-off or pursue debt recovery; do not ship further inventory until settled or formally disputed.",
-        "amount": 4540
+        "customer": null,
+        "message": "Total overdue AR is €76,333 (43 invoices), representing 38% of open AR. Fixed monthly costs (€62,781) cannot be met this month if overdue payments do not arrive by week 2 of May.",
+        "amount": 76333
       },
       {
         "level": "urgent",
+        "customer": "Bemböle contract",
+        "message": "Bemböle contract ends September 2026 (€25K/month recurring revenue). Begin diversification and new customer acquisition now to offset €300K annual revenue gap.",
+        "amount": 25000
+      },
+      {
+        "level": "warning",
+        "customer": "Kesko Oyj Päivittäistavarakauppa",
+        "message": "Invoice #5750 (€3,296) is 14 days overdue. Contact within 24 hours; if unresolved in 5 days, withhold next shipment pending payment.",
+        "amount": 3296
+      },
+      {
+        "level": "warning",
+        "customer": "Wet Goods PTE LTD",
+        "message": "Invoice #14 (€4,540) is 975 days overdue (since Aug 2024). Write down or pursue debt recovery; this is a sunk loss unless legal action is viable.",
+        "amount": 4540
+      },
+      {
+        "level": "warning",
         "customer": null,
-        "message": "April cash risk: Fixed costs (€62,781/mo) + open POs (€79,996) + €74,663 overdue AR = €217,440 outflows vs. €201,863 budgeted revenue + €159,095 open AR (collection uncertain). Initiate daily cash position tracking and contact top 5 overdue customers by phone today.",
-        "amount": null
+        "message": "Open POs (€79,996) combined with €76,333 overdue payables create 8–10 week cash timing mismatch; reduce new POs to 50% of current level until overdue AR recovers.",
+        "amount": 79996
       },
       {
-        "level": "warning",
-        "customer": "My Dear Beer B.V.",
-        "message": "Invoice #5151 (€9,558) is 59 days overdue. Contact immediately and establish written payment plan; withhold further shipments until partial payment received.",
-        "amount": 9558
-      },
-      {
-        "level": "warning",
+        "level": "info",
         "customer": "OlutSatama (Ideaosuuskunta Aito)",
-        "message": "Invoice #3837 (€5,882) is 286 days overdue. Verify account status and dispute history; pursue settlement or write-off decision this week.",
+        "message": "Invoice #3837 (€5,882) is 287 days overdue. Verify if account is active; if dormant, write down; if active, escalate collections.",
         "amount": 5882
-      },
-      {
-        "level": "warning",
-        "customer": null,
-        "message": "Own channels (Espoo Shop, Online Shop, Own Bars) represent low-risk fast cash (3–5 day DSO). Prioritize these channels for April–May to bridge the gap until high-season June export cash arrives (expect 6–8 week lag into July–August).",
-        "amount": null
-      },
-      {
-        "level": "info",
-        "customer": "Gig Linden GmbH",
-        "message": "Invoice #6030 (€2,322) due yesterday (2026-04-15). Send payment reminder and confirm delivery; typical German DSO should be net-30.",
-        "amount": 2322
-      },
-      {
-        "level": "info",
-        "customer": "Hopping Billie's BV",
-        "message": "Invoice #6202 (€2,394) due today (2026-04-16). Monitor for same-day or next-day payment; chase if not received by 2026-04-17 EOD.",
-        "amount": 2394
       }
     ],
-    "weekly_cash_risk": "€74,663 in overdue AR (42 invoices, 4 >100 days old) collides with €79,996 in open POs and €62,781 fixed monthly costs; April revenue collection is uncertain and may not cover outflows without urgent receivables action.",
-    "top_action": "Call Alko Oy, My Dear Beer B.V., Wittich Weine und Biere AG, Kesko Oyj, and CBA Craft Beer Agency today by 5 PM to confirm payment dates and amounts; simultaneously flag Wet Goods PTE LTD (#14) and OlutSatama (#3837) for write-off assessment by finance lead. Document all calls.",
+    "weekly_cash_risk": "Overdue AR (€76K) and pending POs (€80K) create a 6–8 week funding gap; April payroll and loan payments (€62,781) are at risk without immediate collections from Alko, Kesko, and My Dear Beer.",
+    "top_action": "Call Alko Oy today to demand payment or 7-day resolution plan for €18,484 overdue #4460; simultaneously contact Kesko to confirm Kesko Oyj status on €3,296 #5750 and escalate collections if no ETA provided.",
     "pattern_insights": [
-      "Export customers (EU/international: Alko, My Dear Beer B.V., Wittich, CBA, Gig Linden, Made in Poland) account for ~€39,392 overdue (53% of overdue AR); long DSO (6–8 weeks) is structural, but non-payment beyond 60 days signals credit or operational failure—tighten underwriting.",
-      "Extreme outliers (Wet Goods 975 days, Alko 534 days, OlutSatama 286 days) total €28,906 (39% of overdue) and appear uncollectable; immediate write-off or formal dispute escalation will clarify true working capital position and free management focus."
+      "Export customers (My Dear Beer, Wittich Weine, Made in Poland, Gig Linden) show consistent 30–60 day slippage beyond terms; 62% YoY growth is outpacing DSO management and export payment discipline.",
+      "Bemböle contract cliff (Sept 2026) will erase €300K annual revenue; without new customer wins, 62% growth will reverse sharply and leave fixed costs (€62,781/mo) unsustainable."
     ],
-    "wc_note": "62% YoY growth + 6–8 week export DSO creates severe working capital squeeze; €159K open AR vs. €79,996 POs and €62,781 fixed costs leaves minimal buffer. Bemböle contract end (Sept 2026) further reduces predictability. Prioritize own-channel cash acceleration and aggressive overdue resolution to survive April–May trough before peak summer revenue."
+    "wc_note": "Growth-stage cash crisis: 62% YoY expansion with 6–8 week export DSO is consuming working capital faster than collections arrive; overdue AR of 38% signals customer concentration risk (Alko, Kesko, Bemböle) and weak credit management relative to scale."
   },
-  "invoice_count": 89,
-  "open_count": 89,
-  "overdue_count": 42,
+  "invoice_count": 88,
+  "open_count": 88,
+  "overdue_count": 43,
   "odoo_data": {
-    "invoice_count": 89,
+    "invoice_count": 88,
     "purchase_order_total": 79996,
     "stock_lines": 103,
     "sales_30d_count": 50,
